@@ -45,12 +45,14 @@ def plotgraph(data, sharename):
 def purchase(shares, date, quantity):
 
     price = readPrice(shares)
-
     data = {
         "Share": shares,
         "Date": date,
         "Quantity": quantity,
-        "Price": price
+        "Avg_Price": price,
+        "current_price":price,
+        "Profit/loss":0
+        
     }
 
     try:
@@ -61,21 +63,26 @@ def purchase(shares, date, quantity):
 
     found = False
 
-    for item in purchase:
-        if item["Share"] == shares:
+    for stock in purchase:
+        if stock["Share"] == shares:
 
-            old_qty = item["Quantity"]
-            old_price = item["Price"]
+            old_qty = stock["Quantity"]
+            old_price = stock["Avg_Price"]
 
             new_qty = old_qty + quantity
 
             avg_price = ((old_price * old_qty) + (price * quantity)) / new_qty
+            
+            profit_loss = (price-avg_price)*new_qty   
 
-            item["Quantity"] = new_qty
-            item["Price"] = avg_price
-
+            stock["Quantity"] = new_qty
+            stock["Avg_Price"] = round(avg_price,2)
+            stock["current_price"] = price
+            stock["Profit_loss"] = round(profit_loss,2)
             found = True
             break
+        
+        
 
     if not found:
         purchase.append(data)
