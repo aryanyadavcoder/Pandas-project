@@ -17,7 +17,6 @@ def readCSV(sharename):
     return df
 
 
-
 def readPrice(sharename):
 
     data = yf.download(sharename, period="1d", interval="1m")
@@ -25,6 +24,7 @@ def readPrice(sharename):
     price = data["Close"].iloc[-1].item()
 
     return price
+
 
 def onedaychart(sharename):
 
@@ -36,12 +36,12 @@ def onedaychart(sharename):
 def plotgraph(data, sharename):
 
     plt.plot(data["Close"])
-    plt.title(sharename +" Chart")
+    plt.title(sharename + " Chart")
     plt.xlabel("Time")
     plt.ylabel("Price")
     plt.show()
-    
-    
+
+
 def purchase(shares, date, quantity):
 
     price = readPrice(shares)
@@ -50,9 +50,9 @@ def purchase(shares, date, quantity):
         "Date": date,
         "Quantity": quantity,
         "Avg_Price": price,
-        "current_price":price,
-        "Profit/loss":0
-        
+        "current_price": price,
+        "Profit_loss": 0
+
     }
 
     try:
@@ -71,18 +71,16 @@ def purchase(shares, date, quantity):
 
             new_qty = old_qty + quantity
 
-            avg_price = ((old_price * old_qty) + (price * quantity)) / new_qty
-            
-            profit_loss = (price-avg_price)*new_qty   
+            avg_price = ((old_price *old_qty) +(price* quantity))/new_qty
+
+            profit_loss = (price-avg_price)*new_qty
 
             stock["Quantity"] = new_qty
-            stock["Avg_Price"] = round(avg_price,2)
-            stock["current_price"] = price
-            stock["Profit_loss"] = round(profit_loss,2)
+            stock["Avg_Price"] = round(avg_price, 2)
+            stock["current_price"] = round(price, 2)
+            stock["Profit_loss"] = round(profit_loss, 2)
             found = True
             break
-        
-        
 
     if not found:
         purchase.append(data)
@@ -91,4 +89,35 @@ def purchase(shares, date, quantity):
         json.dump(purchase, f, indent=4)
 
     print("stock purchase save")
+    
+    
 
+def profit_loss_chart(share):
+    with open("purchase.json", "r") as f:
+        stocks = json.load(f)
+    for stock in stocks:
+        if stock["Share"] == share:
+            buy_price = stock["Avg_Price"]
+            current_price = stock["current_price"]
+            profit_loss = current_price-buy_price
+            break
+    else:
+        print("Stock not found!")
+        return
+
+    color = ["blue","orange"]
+    if profit_loss>0:
+        color.append("green")
+    else:
+        color.append("red")
+            
+    x = ["Buy Price", "Current Price","Profit/loss"]
+    y = [buy_price, current_price,profit_loss]
+    
+    
+    plt.bar(x,y,color=color,label = share)
+    plt.title(f"{share} Profit/Loss")
+    plt.ylabel("Avg_Price")
+    plt.xlabel("Current_Price")
+    plt.legend()
+    plt.show()

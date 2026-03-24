@@ -17,7 +17,6 @@ def readCSV(sharename):
     return df
 
 
-
 def readPrice(sharename):
 
     data = yf.download(sharename, period="1d", interval="1m")
@@ -46,14 +45,14 @@ def buystock():
     sharename = int(input("Enter the Stock number\n"))
 
     if sharename == 1:
-            stock = "RELIANCE.NS"
-    elif  sharename==2:
-            stock = "TCS.NS"
-    elif sharename==3:
-            stock = "ITC.NS"
-    elif sharename==4:
-            stock = "MRF.NS"  
-    
+        stock = "RELIANCE.NS"
+    elif sharename == 2:
+        stock = "TCS.NS"
+    elif sharename == 3:
+        stock = "ITC.NS"
+    elif sharename == 4:
+        stock = "MRF.NS"
+
     quantity = int(input("Enter the quantity :"))
     Buy_price = int(input("Enter the Buy price :"))
     stock = {
@@ -66,13 +65,12 @@ def buystock():
         json.dump(stock, f, indent=4)
 
     print("Stock saved to Buy_data")
-    
-    
+
+
 def showBuydata():
 
     with open("Buy_data.json") as f:
 
         data = json.load(f)
 
-    print(data)    
-
+    print(data)
