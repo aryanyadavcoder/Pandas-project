@@ -10,7 +10,7 @@ with open("stock/stock.json", "r") as f:
 
 while True:
     print("<---menu--->")
-    print("0-Exit,1-Buy,2-sell,3-View current price and chart,4-Profit_loss_chart,5-show buy stock,6-view chart")
+    print("0-Exit,1-Buy,2-sell,3-View current price and chart,4-Profit_loss_chart,5-show all buy & sell details,6-view chart")
     option = int(input("Enter option\n"))
     if option == 0:
         print("Exit")
@@ -84,6 +84,7 @@ while True:
         end = input("Enter end date :")
         data = sn.view_chart(sharename,start,end)
         sn.plotgraph(data,sharename)
-    
+        
+    # elif option == 7:
     else:
         print("Invalid option")

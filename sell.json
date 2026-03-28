@@ -1,23 +1,9 @@
 [
     {
         "Share": "MRF.NS",
-        "Sell_Quantity": 4,
-        "Buy_Price": 125656.43,
-        "Sell_Price": 129500.0,
-        "Profit/loss": 12284.71
-    },
-    {
-        "Share": "TCS.NS",
-        "Sell_Quantity": 2,
-        "Buy_Price": 2387.53,
-        "Sell_Price": 2383.0,
-        "Profit/loss": -9.06
-    },
-    {
-        "Share": "ITC.NS",
-        "Sell_Quantity": 1,
-        "Buy_Price": 295.9,
-        "Sell_Price": 295.5,
-        "Profit/loss": -0.4
+        "Sell_Quantity": 5,
+        "Buy_Price": 129575.0,
+        "Sell_Price": 129575.0,
+        "Profit": 0.0
     }
 ]

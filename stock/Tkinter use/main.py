@@ -63,10 +63,10 @@ def purchase(shares, date, quantity):
             profit_loss = (price-avg_price)*new_qty
             Total_Price = avg_price*new_qty
             stock["Quantity"] = new_qty
-            stock["Avg_Price"] = avg_price
-            stock["current_price"] = price
-            stock["Profit_loss"] = profit_loss
-            stock["Total_Price"] = Total_Price
+            stock["Avg_Price"] = round(avg_price,2)
+            stock["current_price"] =round(price,2)
+            stock["Profit_loss"] = round(profit_loss,2)
+            stock["Total_Price"] = round(Total_Price,2)
             found = True
             break
     if not found:
@@ -112,24 +112,39 @@ def sell(sharename, sell_quantity):
     for stock in stocks:
         if stock["Share"] == sharename:
             if sell_quantity > stock["Quantity"]:
-                print("Sell quantity not avalible")
+                print("Sell quantity not available")
                 return
             buy_price = stock["Avg_Price"]
             profit = (price - buy_price) * sell_quantity
             stock["Quantity"] -= sell_quantity
             remaining_qty = stock["Quantity"]
-            current_price = price
-            buy_price = stock["Avg_Price"]
-            profit_loss = (current_price-buy_price) * remaining_qty
-            stock["current_price"] = round(current_price, 2)
-            stock["Profit_loss"] = round(profit_loss, 2)
+            stock["current_price"] = round(price, 2)
+            stock["Profit_loss"] = round((price - buy_price) * remaining_qty, 2)
             sell_data = {
                 "Share": sharename,
                 "Sell_Quantity": sell_quantity,
                 "Buy_Price": round(buy_price, 2),
                 "Sell_Price": round(price, 2),
-                "Profit/loss": round(profit, 2)
+                "Profit": round(profit, 2)
             }
+            try:
+                with open("sell.json", "r") as f:
+                    sell_history = json.load(f)
+            except:
+                sell_history = []
+            found = False
+            for s in sell_history:
+                if s["Share"] == sharename:
+                    s["Sell_Quantity"] += sell_quantity
+                    s["Profit"] += round(profit, 2)
+                    s["Sell_Price"] = round(price, 2)
+                    found = True
+                    break
+            if not found:
+                sell_history.append(sell_data)
+            with open("sell.json", "w") as f:
+                json.dump(sell_history, f, indent=4)
+            print("Stock sold successfully")
             if stock["Quantity"] == 0:
                 stocks.remove(stock)
             break
@@ -138,47 +153,40 @@ def sell(sharename, sell_quantity):
         return
     with open("purchase.json", "w") as f:
         json.dump(stocks, f, indent=4)
-    try:
-        with open("sell.json", "r") as f:
-            sell_history = json.load(f)
-    except:
-        sell_history = []
-    found = False
-    for stock in sell_history:
-        if stock["Share"] == sharename:
-            stock["Sell_Quantity"] += sell_quantity
-            stock["Profit"] += round(profit, 2)
-            stock["Sell_Price"] = round(price, 2)
-            found = True
-            break
-    if not found:
-        sell_history.append(sell_data)
-    with open("sell.json", "w") as f:
-        json.dump(sell_history, f, indent=4)
-    print("Stock sold successfully")
-
-
 def profit_loss_details(sharename):
     with open("purchase.json", "r") as f:
-        stocks = json.load(f)
-        price = readPrice(sharename)
-    for stock in stocks:
+        stock_purchase = json.load(f)
+    with open("sell.json","r") as f:
+        stock_sell = json.load(f)
+    buy_quantity = 0
+    buy_price = 0       
+    price = readPrice(sharename)
+    for stock in stock_purchase:
         if stock["Share"] == sharename:
-
-            remaining_qty = stock["Quantity"]
-            current_price = price
+            buy_quantity+=stock["Quantity"]
             buy_price = stock["Avg_Price"]
-            profit_loss = (current_price-buy_price) * remaining_qty
-            stock["current_price"] = round(current_price, 2)
-            stock["Profit_loss"] = round(profit_loss, 2)
-
-            print("Quantity :", stock["Quantity"])
-            print("stock_name :", stock["Share"])
-            print("Buy_Price :", stock["Avg_Price"])
-            print("Current_Price :", stock["current_price"])
-            print("Profit_loss :", stock["Profit_loss"])
-            return
-    print("Stock not found")
+    sell_price = 0
+    sell_qty = 0
+    profit_loss = 0
+    for sell in stock_sell:
+        if sell["Share"] == sharename:
+            sell_price =sell.get("Sell_Price")  
+            sell_qty += sell["Sell_Quantity"]
+            profit_loss =sell.get("Profit/loss")
+    
+    remaining_quantity = buy_quantity-sell_qty
+    current_price = price  
+                
+    print("Stock_name :", sharename)
+    print("Buy_Quantity :", buy_quantity)
+    print("Buy_Price :", buy_price)
+    print("Sell_Price :", sell_price)
+    print("Sell_Quantity :",sell_qty)
+    print("Profit_loss :", profit_loss)
+    print("Remaining_quantity :", remaining_quantity)
+    print("Current_price :", price)
+    return
+print("Stock not found")
 
 
 def buy_quantity(sharename):
@@ -188,6 +196,7 @@ def buy_quantity(sharename):
         if stock["Share"] == sharename:
             print("Avalible Quantity :", stock["Quantity"])
             return stock["Quantity"]
+     
 
 def view_chart(sharename,start,end):
     data = yf.download(sharename,start=start,end=end) 
