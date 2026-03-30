@@ -1,6 +1,7 @@
 import tkinter as tk
 from datetime import date
 import main as sn
+import json
 
 
 root = tk.Tk()
@@ -65,5 +66,34 @@ price_label.pack()
 
 
 def show_profit_loss():
-    try
+    try:
+        name = share_entry.get().upper()
+        sharename = name+".NS"
+        with open("purchase.json","r") as f:
+            stocks = json.load(f)
+        for stock in stocks:
+            if stock["Share"] == sharename:
+                buy_price = stock["Avg_Price"]
+                qty = stock["Quantity"]
+                current_price = sn.readPrice(sharename)
+                profit = round((current_price-buy_price)*qty,2)
+                if profit >= 0:
+                    pl_label.config(
+                        text=f"Profit: ₹{profit} | Qty: {qty}",
+                        fg="green"
+                    )
+                else:
+                    pl_label.config(
+                        text=f"Loss: ₹{profit} | Qty: {qty}",
+                        fg="red"
+                    )  
+                return
+            
+        pl_label.config(text="stock not found")   
+    except Exception as e:
+        pl_label.config(text =f"Error:{e}")   
+
+tk.Button(root, text="Show Profit/Loss", command=show_profit_loss).pack(pady=5)
+pl_label = tk.Label(root, text="")
+pl_label.pack() 
 root.mainloop()

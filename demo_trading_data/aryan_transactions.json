@@ -1,0 +1,20 @@
+[
+  {
+    "type": "buy",
+    "username": "aryan",
+    "ticker": "RELIANCE.NS",
+    "quantity": 10,
+    "price": 1352.5,
+    "total": 13525.0,
+    "timestamp": "2026-03-30T10:33:35.821575"
+  },
+  {
+    "type": "sell",
+    "username": "aryan",
+    "ticker": "RELIANCE.NS",
+    "quantity": 10,
+    "price": 1352.699951171875,
+    "total": 13526.99951171875,
+    "timestamp": "2026-03-30T10:33:43.378218"
+  }
+]
