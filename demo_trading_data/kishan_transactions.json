@@ -1,0 +1,29 @@
+[
+  {
+    "type": "buy",
+    "username": "kishan",
+    "ticker": "RELIANCE.NS",
+    "quantity": 1,
+    "price": 1343.9000244140625,
+    "total": 1343.9000244140625,
+    "timestamp": "2026-03-30T17:28:50.283147"
+  },
+  {
+    "type": "buy",
+    "username": "kishan",
+    "ticker": "RELIANCE.NS",
+    "quantity": 10,
+    "price": 1343.9000244140625,
+    "total": 13439.000244140625,
+    "timestamp": "2026-03-30T17:29:03.817822"
+  },
+  {
+    "type": "sell",
+    "username": "kishan",
+    "ticker": "RELIANCE.NS",
+    "quantity": 10,
+    "price": 1343.9000244140625,
+    "total": 13439.000244140625,
+    "timestamp": "2026-03-30T17:29:07.600394"
+  }
+]

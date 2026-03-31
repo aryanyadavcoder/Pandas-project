@@ -1,0 +1,19 @@
+{
+  "username": "kishan",
+  "cash": 98656.09997558594,
+  "holdings": [
+    {
+      "ticker": "RELIANCE.NS",
+      "quantity": 1,
+      "avg_buy_price": 1343.9000244140625,
+      "current_price": 1343.9000244140625,
+      "cost_value": 1343.9000244140625,
+      "market_value": 1343.9000244140625,
+      "pnl": 0.0
+    }
+  ],
+  "total_market_value": 1343.9000244140625,
+  "total_portfolio_value": 100000.0,
+  "total_pnl": 0.0,
+  "generated_at": "2026-03-30T17:29:07.988364"
+}

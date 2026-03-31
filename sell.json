@@ -5,5 +5,19 @@
         "Buy_Price": 129575.0,
         "Sell_Price": 129575.0,
         "Profit": 0.0
+    },
+    {
+        "Share": "ITC.NS",
+        "Sell_Quantity": 5,
+        "Buy_Price": 289.82,
+        "Sell_Price": 288.4,
+        "Profit": -7.1
+    },
+    {
+        "Share": "TCS.NS",
+        "Sell_Quantity": 13,
+        "Buy_Price": 2359.82,
+        "Sell_Price": 2358.9,
+        "Profit": -11.959999999999999
     }
 ]

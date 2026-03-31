@@ -8,7 +8,7 @@ from matplotlib.figure import Figure
 from function import analyze_share, analyze_two_shares, DemoTradingApp
 
 
-class StockTradingGUI:
+class StockTradingGUI:  
     def __init__(self, root):
         self.root = root
         self.root.title("PP   Tkinter Stock Trading GUI")
