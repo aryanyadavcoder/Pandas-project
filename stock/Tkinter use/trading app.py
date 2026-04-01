@@ -674,7 +674,7 @@ class StockTradingGUI:
         self._run_in_thread(task)
 
     def _money(self, x):
-        try:
+        try:    
             return f"{float(x):,.2f}"
         except Exception:
             return str(x)
