@@ -22,5 +22,23 @@
         "Share": "MRF.NS",
         "Quantity": 5,
         "Date": "2026-03-30 17:10:55"
+    },
+    {
+        "Action": "SELL",
+        "Share": "TCS.NS",
+        "Quantity": 3,
+        "Date": "2026-03-31 14:06:19"
+    },
+    {
+        "Action": "BUY",
+        "Share": "TCS.NS",
+        "Quantity": 10,
+        "Date": "2026-03-31 16:48:30"
+    },
+    {
+        "Action": "BUY",
+        "Share": "MRF.NS",
+        "Quantity": 10,
+        "Date": "2026-03-31 16:48:38"
     }
 ]

@@ -2,11 +2,11 @@
     {
         "Share": "TCS.NS",
         "Date": "2026-03-30",
-        "Quantity": 19,
-        "Total_Price": 44827.38,
-        "Avg_Price": 2359.34,
+        "Quantity": 42,
+        "Total_Price": 99080.84,
+        "Avg_Price": 2359.07,
         "current_price": 2358.9,
-        "Profit_loss": -8.28
+        "Profit_loss": -7.04
     },
     {
         "Share": "RELIANCE.NS",
@@ -29,10 +29,10 @@
     {
         "Share": "MRF.NS",
         "Date": "2026-03-30",
-        "Quantity": 34,
-        "Total_Price": 4363224.88,
-        "Avg_Price": 128330.14,
+        "Quantity": 44,
+        "Total_Price": 5648174.76,
+        "Avg_Price": 128367.61,
         "current_price": 128495.0,
-        "Profit_loss": 5605.12
+        "Profit_loss": 5605.24
     }
 ]
