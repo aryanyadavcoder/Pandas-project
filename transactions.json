@@ -40,5 +40,11 @@
         "Share": "MRF.NS",
         "Quantity": 10,
         "Date": "2026-03-31 16:48:38"
+    },
+    {
+        "Action": "BUY",
+        "Share": "TCS.NS",
+        "Quantity": 10,
+        "Date": "2026-04-01 15:32:07"
     }
 ]

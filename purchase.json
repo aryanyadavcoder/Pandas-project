@@ -2,18 +2,18 @@
     {
         "Share": "TCS.NS",
         "Date": "2026-03-30",
-        "Quantity": 42,
-        "Total_Price": 99080.84,
-        "Avg_Price": 2359.07,
-        "current_price": 2358.9,
-        "Profit_loss": -7.04
+        "Quantity": 65,
+        "Total_Price": 155041.25,
+        "Avg_Price": 2385.25,
+        "current_price": 2410.0,
+        "Profit_loss": 1608.75
     },
     {
         "Share": "RELIANCE.NS",
         "Date": "2026-03-30",
-        "Quantity": 10,
-        "Total_Price": 13493.0,
-        "Avg_Price": 1349.3,
+        "Quantity": 13,
+        "Total_Price": 17621.63,
+        "Avg_Price": 1355.51,
         "current_price": 1349.3,
         "Profit_loss": 0
     },

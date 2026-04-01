@@ -1,0 +1,92 @@
+[
+  {
+    "type": "buy",
+    "username": "ahu",
+    "ticker": "RELIANCE.NS",
+    "quantity": 1,
+    "price": 1367.9000244140625,
+    "total": 1367.9000244140625,
+    "timestamp": "2026-04-01T15:04:02.285359"
+  },
+  {
+    "type": "sell",
+    "username": "ahu",
+    "ticker": "RELIANCE.NS",
+    "quantity": 1,
+    "price": 1368.0,
+    "total": 1368.0,
+    "timestamp": "2026-04-01T15:05:04.054394"
+  },
+  {
+    "type": "buy",
+    "username": "ahu",
+    "ticker": "RELIANCE.NS",
+    "quantity": 1,
+    "price": 1367.699951171875,
+    "total": 1367.699951171875,
+    "timestamp": "2026-04-01T15:05:52.223490"
+  },
+  {
+    "type": "buy",
+    "username": "ahu",
+    "ticker": "RELIANCE.NS",
+    "quantity": 1,
+    "price": 1369.5999755859375,
+    "total": 1369.5999755859375,
+    "timestamp": "2026-04-01T15:17:08.737646"
+  },
+  {
+    "type": "buy",
+    "username": "ahu",
+    "ticker": "RELIANCE.NS",
+    "quantity": 10,
+    "price": 1369.800048828125,
+    "total": 13698.00048828125,
+    "timestamp": "2026-04-01T15:17:22.149011"
+  },
+  {
+    "type": "buy",
+    "username": "ahu",
+    "ticker": "RELIANCE.NS",
+    "quantity": 10,
+    "price": 1370.199951171875,
+    "total": 13701.99951171875,
+    "timestamp": "2026-04-01T15:19:16.452028"
+  },
+  {
+    "type": "buy",
+    "username": "ahu",
+    "ticker": "RELIANCE.NS",
+    "quantity": 10,
+    "price": 1369.5,
+    "total": 13695.0,
+    "timestamp": "2026-04-01T15:24:02.752339"
+  },
+  {
+    "type": "sell",
+    "username": "ahu",
+    "ticker": "RELIANCE.NS",
+    "quantity": 10,
+    "price": 1369.5999755859375,
+    "total": 13695.999755859375,
+    "timestamp": "2026-04-01T15:25:37.377324"
+  },
+  {
+    "type": "buy",
+    "username": "ahu",
+    "ticker": "RELIANCE.NS",
+    "quantity": 10,
+    "price": 1369.5,
+    "total": 13695.0,
+    "timestamp": "2026-04-01T15:25:52.753861"
+  },
+  {
+    "type": "sell",
+    "username": "ahu",
+    "ticker": "RELIANCE.NS",
+    "quantity": 10,
+    "price": 1370.0,
+    "total": 13700.0,
+    "timestamp": "2026-04-01T15:26:36.879138"
+  }
+]

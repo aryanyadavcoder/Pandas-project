@@ -1,6 +1,8 @@
 import threading
+import time
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
+import yfinance as yf
 
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
@@ -235,6 +237,10 @@ class StockTradingGUI:
         self.trade_cash = tk.StringVar(value="100000")
         self.trade_ticker = tk.StringVar(value="RELIANCE.NS")
         self.trade_qty = tk.StringVar(value="1")
+        
+        # --- ADDED: Auto-Trade Variables ---
+        self.trade_target_price = tk.StringVar(value="0.00")
+        self.auto_trade_active = tk.BooleanVar(value=False)
 
         tk.Label(user_content, text="User", bg=self.colors["panel"], fg=self.colors["ink"]).grid(row=0, column=0, sticky="w", pady=6)
         self.user_combo = ttk.Combobox(user_content, textvariable=self.trade_user, width=26)
@@ -249,19 +255,26 @@ class StockTradingGUI:
         tk.Label(user_content, text="Quantity", bg=self.colors["panel"], fg=self.colors["ink"]).grid(row=3, column=0, sticky="w", pady=6)
         tk.Entry(user_content, textvariable=self.trade_qty, width=28, relief="solid", bd=1).grid(row=3, column=1, sticky="w", pady=6)
 
+        # --- ADDED: Target Price & Checkbutton UI ---
+        tk.Label(user_content, text="Target Price", bg=self.colors["panel"], fg=self.colors["ink"]).grid(row=4, column=0, sticky="w", pady=6)
+        tk.Entry(user_content, textvariable=self.trade_target_price, width=28, relief="solid", bd=1, fg="blue").grid(row=4, column=1, sticky="w", pady=6)
+
+        tk.Checkbutton(user_content, text="Enable Auto-Trade", variable=self.auto_trade_active, 
+                       bg=self.colors["panel"], fg=self.colors["brand"]).grid(row=5, column=0, columnspan=2, pady=5, sticky="w")
+
         btnrow1 = tk.Frame(user_content, bg=self.colors["panel"])
-        btnrow1.grid(row=4, column=0, columnspan=2, sticky="w", pady=(10, 4))
+        btnrow1.grid(row=6, column=0, columnspan=2, sticky="w", pady=(10, 4))
         ttk.Button(btnrow1, text="Create User", command=self.create_user, style="Soft.TButton").pack(side="left", padx=(0, 8))
         ttk.Button(btnrow1, text="Deposit Cash", command=self.deposit_cash, style="Soft.TButton").pack(side="left")
 
         btnrow2 = tk.Frame(user_content, bg=self.colors["panel"])
-        btnrow2.grid(row=5, column=0, columnspan=2, sticky="w", pady=4)
+        btnrow2.grid(row=7, column=0, columnspan=2, sticky="w", pady=4)
         ttk.Button(btnrow2, text="Buy", command=self.buy_share, style="Accent.TButton").pack(side="left", padx=(0, 8))
         ttk.Button(btnrow2, text="Sell", command=self.sell_share, style="Soft.TButton").pack(side="left", padx=(0, 8))
         ttk.Button(btnrow2, text="Market Snapshot", command=self.save_snapshot, style="Soft.TButton").pack(side="left")
 
         btnrow3 = tk.Frame(user_content, bg=self.colors["panel"])
-        btnrow3.grid(row=6, column=0, columnspan=2, sticky="w", pady=4)
+        btnrow3.grid(row=8, column=0, columnspan=2, sticky="w", pady=4)
         ttk.Button(btnrow3, text="Refresh Portfolio", command=self.refresh_portfolio, style="Soft.TButton").pack(side="left", padx=(0, 8))
         ttk.Button(btnrow3, text="Refresh Transactions", command=self.refresh_transactions, style="Soft.TButton").pack(side="left")
 
@@ -534,6 +547,11 @@ class StockTradingGUI:
             self.log(f"Deposit error: {e}")
 
     def buy_share(self):
+        # --- ADDED: Auto-Trade Check ---
+        if self.auto_trade_active.get():
+            self._run_in_thread(lambda: self._run_algo_logic("BUY"))
+            return
+
         def task():
             try:
                 txn = self.trading.buy_share(self.trade_user.get().strip(), self.trade_ticker.get().strip(), int(self.trade_qty.get()))
@@ -547,6 +565,11 @@ class StockTradingGUI:
         self._run_in_thread(task)
 
     def sell_share(self):
+        # --- ADDED: Auto-Trade Check ---
+        if self.auto_trade_active.get():
+            self._run_in_thread(lambda: self._run_algo_logic("SELL"))
+            return
+
         def task():
             try:
                 txn = self.trading.sell_share(self.trade_user.get().strip(), self.trade_ticker.get().strip(), int(self.trade_qty.get()))
@@ -558,6 +581,33 @@ class StockTradingGUI:
                 self.root.after(0, lambda: messagebox.showerror("Error", str(e)))
                 self.log(f"Sell error: {e}")
         self._run_in_thread(task)
+
+    # --- ADDED: New Algo Logic Method ---
+    def _run_algo_logic(self, mode):
+        target = float(self.trade_target_price.get())
+        ticker = self.trade_ticker.get().strip()
+        user = self.trade_user.get().strip()
+        qty = int(self.trade_qty.get())
+        self.log(f"ALGO START: Waiting for {ticker} to hit {target} to {mode}")
+        
+        while self.auto_trade_active.get():
+            try:
+                price = yf.Ticker(ticker).history(period="1d")["Close"].iloc[-1]
+                if (mode == "BUY" and price <= target) or (mode == "SELL" and price >= target):
+                    if mode == "BUY":
+                        self.trading.buy_share(user, ticker, qty)
+                    else:
+                        self.trading.sell_share(user, ticker, qty)
+                    
+                    self.root.after(0, self.refresh_transactions)
+                    self.root.after(0, self.refresh_portfolio)
+                    self.root.after(0, lambda: messagebox.showinfo("Algo Success", f"Auto-{mode} executed at {price:.2f}"))
+                    self.auto_trade_active.set(False)
+                    break
+                time.sleep(15) 
+            except Exception as e:
+                self.log(f"Algo Loop Error: {e}")
+                break
 
     def refresh_portfolio(self):
         username = self.trade_user.get().strip()

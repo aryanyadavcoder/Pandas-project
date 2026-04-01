@@ -1,0 +1,19 @@
+{
+  "username": "ahu",
+  "cash": 69868.7998046875,
+  "holdings": [
+    {
+      "ticker": "RELIANCE.NS",
+      "quantity": 22,
+      "avg_buy_price": 1369.6783187389374,
+      "current_price": 1370.0,
+      "cost_value": 30132.923012256622,
+      "market_value": 30140.0,
+      "pnl": 7.0769877433776855
+    }
+  ],
+  "total_market_value": 30140.0,
+  "total_portfolio_value": 100008.7998046875,
+  "total_pnl": 7.0769877433776855,
+  "generated_at": "2026-04-01T15:26:37.293522"
+}
