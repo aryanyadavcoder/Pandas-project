@@ -1,10 +1,10 @@
 {
   "ahu": {
-    "cash": 46717.49951171875,
+    "cash": 45410.99951171875,
     "portfolio": {
       "RELIANCE.NS": {
-        "quantity": 25,
-        "avg_buy_price": 1367.30892244339
+        "quantity": 26,
+        "avg_buy_price": 1364.9701177340287
       },
       "TCS.NS": {
         "quantity": 10,

@@ -148,5 +148,14 @@
     "price": 1350.5,
     "total": 1350.5,
     "timestamp": "2026-04-03T11:32:17.901586"
+  },
+  {
+    "type": "buy",
+    "username": "ahu",
+    "ticker": "RELIANCE.NS",
+    "quantity": 1,
+    "price": 1306.5,
+    "total": 1306.5,
+    "timestamp": "2026-04-07T15:25:36.207226"
   }
 ]
