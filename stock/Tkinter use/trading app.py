@@ -255,7 +255,7 @@ class StockTradingGUI:
         header.pack(fill="x")
         header.pack_propagate(False)
 
-        tk.Label(header, text="PP   Tkinter Stock Trading GUI", bg=self.colors["brand"], fg="white",
+        tk.Label(header, text="Trade Aryan", bg=self.colors["brand"], fg="white",
                  font=("Segoe UI", 20, "bold")).pack(side="left", padx=18)
         tk.Label(header, text="Analysis • Comparison • Demo Trading • Table View • Chart Preview",
                  bg=self.colors["brand"], fg="#fff5e6", font=("Segoe UI", 10)).pack(side="left", padx=8, pady=6)
