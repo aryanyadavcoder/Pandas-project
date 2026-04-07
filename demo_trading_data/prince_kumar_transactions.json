@@ -1,0 +1,32 @@
+[
+  {
+    "type": "deposit",
+    "username": "prince kumar",
+    "amount": 5000.0,
+    "timestamp": "2026-04-02T11:52:03.013454"
+  },
+  {
+    "type": "buy",
+    "username": "prince kumar",
+    "ticker": "TCS.NS",
+    "quantity": 1,
+    "price": 2413.5,
+    "total": 2413.5,
+    "timestamp": "2026-04-02T11:52:03.807333"
+  },
+  {
+    "type": "deposit",
+    "username": "prince kumar",
+    "amount": 1.0,
+    "timestamp": "2026-04-02T11:53:12.200569"
+  },
+  {
+    "type": "sell",
+    "username": "prince kumar",
+    "ticker": "TCS.NS",
+    "quantity": 1,
+    "price": 2410.10009765625,
+    "total": 2410.10009765625,
+    "timestamp": "2026-04-02T11:53:19.469443"
+  }
+]

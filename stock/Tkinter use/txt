@@ -1,0 +1,47 @@
+import matplotlib.pyplot as plt
+import yfinance as yf
+shername = input("Enter stock name :").upper().strip()
+if not shername.endswith(".NS"):
+    shername += ".NS"
+start = input("Enter start date :")
+end = input("Enter end date :")
+data = yf.download(shername,start=start,end=end)
+a = data['Close'].values.flatten().tolist()
+
+
+def group_avg(data, group_size):
+    result = []
+    
+    for i in range(0, len(data), group_size):
+        group = data[i:i+group_size]
+        avg = sum(group) / len(group)
+        result.append(avg)
+
+    return result
+
+def plot_avg(data, group_size, title):
+    y = group_avg(data, group_size)
+    x = [i+1 for i in range(len(y))]
+
+    plt.figure()
+    plt.bar(x, y)
+    plt.title(title)
+    plt.xlabel("Group Index")
+    plt.ylabel("Average Value")
+    plt.show()
+
+
+print("Choose option:")
+print("1 → 2")
+print("2 → 7")
+
+choice = int(input("Enter choice: "))
+
+if choice == 1:
+    plot_avg(a, 2, "2 Avg Plot")
+
+elif choice == 2:
+    plot_avg(a, 7, "7 Avg Plot")
+
+else:
+    print("Invalid choice")

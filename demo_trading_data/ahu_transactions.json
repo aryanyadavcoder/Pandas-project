@@ -88,5 +88,65 @@
     "price": 1370.0,
     "total": 13700.0,
     "timestamp": "2026-04-01T15:26:36.879138"
+  },
+  {
+    "type": "deposit",
+    "username": "ahu",
+    "amount": 5000.0,
+    "timestamp": "2026-04-02T11:54:37.227914"
+  },
+  {
+    "type": "buy",
+    "username": "ahu",
+    "ticker": "TCS.NS",
+    "quantity": 10,
+    "price": 2410.800048828125,
+    "total": 24108.00048828125,
+    "timestamp": "2026-04-02T11:59:15.076310"
+  },
+  {
+    "type": "sell",
+    "username": "ahu",
+    "ticker": "TCS.NS",
+    "quantity": 5,
+    "price": 2407.0,
+    "total": 12035.0,
+    "timestamp": "2026-04-02T12:08:46.848205"
+  },
+  {
+    "type": "buy",
+    "username": "ahu",
+    "ticker": "TCS.NS",
+    "quantity": 5,
+    "price": 2405.699951171875,
+    "total": 12028.499755859375,
+    "timestamp": "2026-04-02T12:12:17.859172"
+  },
+  {
+    "type": "buy",
+    "username": "ahu",
+    "ticker": "RELIANCE.NS",
+    "quantity": 1,
+    "price": 1348.4000244140625,
+    "total": 1348.4000244140625,
+    "timestamp": "2026-04-02T15:25:32.233493"
+  },
+  {
+    "type": "buy",
+    "username": "ahu",
+    "ticker": "RELIANCE.NS",
+    "quantity": 1,
+    "price": 1350.9000244140625,
+    "total": 1350.9000244140625,
+    "timestamp": "2026-04-02T15:30:55.673245"
+  },
+  {
+    "type": "buy",
+    "username": "ahu",
+    "ticker": "RELIANCE.NS",
+    "quantity": 1,
+    "price": 1350.5,
+    "total": 1350.5,
+    "timestamp": "2026-04-03T11:32:17.901586"
   }
 ]

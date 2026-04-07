@@ -132,7 +132,7 @@ def _calculate_statistics(series: pd.Series, column_name: str, share_name: str) 
         "Variance (Population)": float(np.var(x)),
         "Std Dev (Population)": float(np.std(x)),
         "Variance (Sample)": float(sample_variance) if not np.isnan(sample_variance) else None,
-        "Std Dev (Sample)": float(sample_std) if not np.isnan(sample_std) else None,
+        "Std Dev (Sample)": float(sample_std) if not np.isnan(sample_std) else None,    
         "Skewness": float(pd.Series(x).skew()) if len(x) > 2 else None,
         "Kurtosis": float(pd.Series(x).kurt()) if len(x) > 3 else None,
     }
@@ -155,6 +155,22 @@ def _save_line_chart(x, y, title, xlabel, ylabel, file_path):
     plt.savefig(file_path, dpi=150, bbox_inches="tight")
     plt.close()
 
+
+def update_current_price(self):
+    try:
+        ticker = self.single_ticker.get().strip()
+        data = yf.Ticker(ticker).history(period="1d")
+
+        if not data.empty:
+            price = data["Close"].iloc[-1]
+            self.current_price_var.set(f"{price:.2f}")
+            self.log(f"Current price updated: {price:.2f}")
+        else:
+            self.current_price_var.set("N/A")
+
+    except Exception as e:
+        self.current_price_var.set("Error")
+        self.log(f"Price fetch error: {e}")
 
 def _save_single_share_charts(df: pd.DataFrame, share_name: str, prefix: str, output_dir: str) -> list:
     chart_files = []
@@ -250,6 +266,23 @@ def analyze_share(share_name: str, period: str = "1mo", interval: str = "1d", ou
         "stats_json": stats_json,
         "chart_files": chart_files,
     }
+    
+    
+def update_current_price(self):
+    try:
+        ticker = self.single_ticker.get().strip()
+        data = yf.Ticker(ticker).history(period="1d")
+
+        if not data.empty:
+            price = data["Close"].iloc[-1]
+            self.current_price_var.set(f"{price:.2f}")
+            self.log(f"Current price updated: {price:.2f}")
+        else:
+            self.current_price_var.set("N/A")
+
+    except Exception as e:
+        self.current_price_var.set("Error")
+        self.log(f"Price fetch error: {e}")         
 
 
 def analyze_two_shares(share1: str, share2: str, period: str = "1mo", interval: str = "1d", output_dir: str = "stock_compare_output"):

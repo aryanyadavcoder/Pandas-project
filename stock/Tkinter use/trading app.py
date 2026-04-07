@@ -32,11 +32,206 @@ class StockTradingGUI:
         self.trading = DemoTradingApp()
         self.current_analysis_result = None
         self.current_comparison_result = None
+        
+        self.comp_group_start = tk.StringVar(value="2025-01-01")
+        self.comp_group_end = tk.StringVar(value="2026-04-04")
+        self.comp_group_size = tk.IntVar(value=2)
 
         self._configure_style()
         self._build_layout()
         self.refresh_user_combo()
+    def group_avg(self, data, group_size):
+        result = []
+        for i in range(0, len(data), group_size):
+            group = data[i:i + group_size]
+            if group:
+                avg = sum(group) / len(group)
+                result.append(avg)
+        return result
 
+
+
+    def plot_avg_tk(self, data, group_size):
+        y = self.group_avg(data, group_size)
+        x = [i+1 for i in range(len(y))]
+
+        self.single_ax.clear()
+        self.single_ax.plot(x, y, marker="o")
+        self.single_ax.set_title(f"{group_size} Days Average")
+        self.single_ax.set_xlabel("Group Index")
+        self.single_ax.set_ylabel("Average Price")
+
+        self.single_canvas.draw()
+        
+    def plot_compare_group_average(self):
+        ticker1 = self.compare_ticker1.get().upper().strip()
+        ticker2 = self.compare_ticker2.get().upper().strip()
+
+        if not ticker1.endswith(".NS"): 
+            ticker1 += ".NS"
+        if not ticker2.endswith(".NS"): 
+            ticker2 += ".NS"
+
+        start = self.comp_group_start.get().strip()
+        end = self.comp_group_end.get().strip()
+        group_size = self.comp_group_size.get()
+
+        try:
+            data1 = yf.download(ticker1, start=start, end=end, progress=False)
+            data2 = yf.download(ticker2, start=start, end=end, progress=False)
+
+            if data1.empty or data2.empty:
+                messagebox.showerror("Error", "No data found for one or both stocks!")
+                return
+
+            close1 = data1['Close'].values.flatten().tolist()
+            close2 = data2['Close'].values.flatten().tolist()
+
+            avg1 = self.group_avg(close1, group_size)
+            avg2 = self.group_avg(close2, group_size)
+            chart_type = self.chart_type.get()
+            self.compare_ax.clear()
+
+            x1 = list(range(1, len(avg1) + 1))
+            x2 = list(range(1, len(avg2) + 1))  
+            if chart_type == "Line":          
+                self.compare_ax.plot(x1, avg1,  linestyle="-",linewidth=1.5 ,label=ticker1, color="#d97706")
+                self.compare_ax.plot(x2, avg2, linestyle="-", linewidth=1.5,label=ticker2, color="#1f77b4")
+
+            elif chart_type == "Bar":
+                width = 0.4
+                self.compare_ax.bar([i-width/2 for i in x1], avg1,width=width,label = ticker1)
+                self.compare_ax.bar([i+ width/2 for i in x2],avg2,width=width,label = ticker2) 
+            elif chart_type == "Scatter":
+                self.compare_ax.scatter(x1, avg1, label=ticker1)
+                self.compare_ax.scatter(x2, avg2, label=ticker2)
+            self.compare_ax.set_title(f"Group Average Comparison ({group_size} Days)")
+            self.compare_ax.set_xlabel("Group Index")
+            self.compare_ax.set_ylabel("Average Close Price")
+            self.compare_ax.legend()
+            self.compare_ax.grid(axis='y', alpha=0.3)
+
+            self.compare_fig.tight_layout()
+            self.compare_canvas.draw()
+
+            messagebox.showinfo("Success", f"{group_size} Days Group Average Comparison is ready!")
+
+        except Exception as e:
+            messagebox.showerror("Error", f"Error: {str(e)}")    
+        
+        
+    def _build_compare_tab(self):
+        top = tk.Frame(self.tab_compare, bg=self.colors["bg"])
+        top.pack(fill="x", padx=8, pady=8)
+
+        left_wrap, form = self._section(top, "Inputs")
+        left_wrap.pack(side="left", fill="y", padx=(0, 8))
+
+        self.compare_ticker1 = tk.StringVar(value="RELIANCE.NS")
+        self.compare_ticker2 = tk.StringVar(value="TCS.NS")
+        self.compare_period = tk.StringVar(value="1mo")
+        self.compare_interval = tk.StringVar(value="1d")
+        self.compare_output = tk.StringVar(value="stock_compare_output")
+
+        self._labeled_entry(form, "Ticker 1", self.compare_ticker1, 0)
+        self._labeled_entry(form, "Ticker 2", self.compare_ticker2, 1)
+        self._labeled_entry(form, "Period", self.compare_period, 2)
+        self._labeled_entry(form, "Interval", self.compare_interval, 3)
+        self._labeled_entry(form, "Output Folder", self.compare_output, 4, width=30)
+
+        # Compare Shares Button
+        btnrow = tk.Frame(form, bg=self.colors["panel"])
+        btnrow.grid(row=5, column=0, columnspan=3, sticky="w", pady=(8, 0))
+        ttk.Button(btnrow, text="Browse", command=self._browse_compare_output, style="Soft.TButton").pack(side="left", padx=(0, 8))
+        ttk.Button(btnrow, text="Compare Shares", command=self.run_comparison, style="Accent.TButton").pack(side="left")
+
+        # ===================== GROUP AVERAGE COMPARISON  =====================
+        tk.Label(form, text="────────────────────────────", bg=self.colors["panel"], fg="#d97706").grid(
+            row=6, column=0, columnspan=2, pady=(15, 5), sticky="w")
+
+        tk.Label(form, text="Group Average Comparison", bg=self.colors["panel"], 
+                 fg=self.colors["brand"], font=("Segoe UI", 11, "bold")).grid(
+            row=7, column=0, sticky="w", pady=5, columnspan=2)
+
+        tk.Label(form, text="Start Date:", bg=self.colors["panel"]).grid(row=8, column=0, sticky="w", pady=4)
+        tk.Entry(form, textvariable=self.comp_group_start, width=22).grid(row=8, column=1, sticky="w", pady=4)
+
+        tk.Label(form, text="End Date:", bg=self.colors["panel"]).grid(row=9, column=0, sticky="w", pady=4)
+        tk.Entry(form, textvariable=self.comp_group_end, width=22).grid(row=9, column=1, sticky="w", pady=4)
+
+        tk.Label(form, text="Group Size:", bg=self.colors["panel"]).grid(row=10, column=0, sticky="w", pady=4)
+        ttk.Combobox(form, textvariable=self.comp_group_size, values=[2, 7], 
+                     state="readonly", width=10).grid(row=10, column=1, sticky="w", pady=4)
+
+        ttk.Button(form, text="Compare Group Average", 
+                   command=self.plot_compare_group_average,
+                   style="Accent.TButton").grid(row=11, column=0, columnspan=2, pady=12)
+
+        # Right Side - Chart Preview
+        right = tk.Frame(top, bg=self.colors["bg"])
+        right.pack(side="left", fill="both", expand=True)
+
+        preview_wrap, preview_content = self._section(right, "Comparison Chart Preview")
+        preview_wrap.pack(fill="both", expand=True)
+
+        self.compare_chart_choice = tk.StringVar(value="")
+        row = tk.Frame(preview_content, bg=self.colors["panel"])
+        row.pack(fill="x", pady=(0, 8))
+        tk.Label(row, text="Chart:", bg=self.colors["panel"], fg=self.colors["ink"]).pack(side="left")
+        self.compare_chart_combo = ttk.Combobox(row, textvariable=self.compare_chart_choice, width=36, state="readonly")
+        self.compare_chart_combo.pack(side="left", padx=8)
+        self.compare_chart_combo.bind("<<ComboboxSelected>>", lambda e: self.update_compare_chart())
+        
+        self.chart_type = tk.StringVar(value="Line")
+
+        tk.Label(row, text="Type:", bg=self.colors["panel"]).pack(side="left", padx=(10, 0))
+
+        self.chart_type_combo = ttk.Combobox(
+            row,
+            textvariable=self.chart_type,
+            values=["Line", "Bar", "Scatter"],
+            width=10,
+            state="readonly"
+        )
+        self.chart_type_combo.pack(side="left", padx=5)
+
+        self.chart_type_combo.bind("<<ComboboxSelected>>", lambda e: self.plot_compare_group_average())
+        
+        self.compare_fig = Figure(figsize=(7.2, 4.4), dpi=100)
+        self.compare_ax = self.compare_fig.add_subplot(111)
+        self.compare_canvas = FigureCanvasTkAgg(self.compare_fig, master=preview_content)
+        self.compare_canvas.get_tk_widget().pack(fill="both", expand=True)
+
+        # Bottom Table
+        bottom = tk.Frame(self.tab_compare, bg=self.colors["bg"])
+        bottom.pack(fill="both", expand=True, padx=8, pady=(0, 8))
+        compare_wrap, compare_content = self._section(bottom, "Comparison Summary")
+        compare_wrap.pack(fill="both", expand=True)
+        self.compare_frame, self.compare_tree = self._build_treeview(
+            compare_content,
+            columns=("Column", "Mean1", "Mean2", "Std1", "Std2", "Min1", "Min2", "Max1", "Max2"),
+        )
+        self.compare_frame.pack(fill="both", expand=True)
+    
+    def get_stock_data(self, ticker, days):
+        df = yf.Ticker(ticker).history(period=f"{days}d")
+        return df["Close"].tolist()  
+    
+    def update_current_price(self):
+        try:
+            ticker = self.single_ticker.get().strip()
+            data = yf.Ticker(ticker).history(period="1d")
+
+            if not data.empty:
+                price = data["Close"].iloc[-1]
+                self.current_price_var.set(f"{price:.2f}")
+            else:
+                self.current_price_var.set("No Data")
+
+        except Exception as e:
+            self.current_price_var.set("Error")
+            self.log(f"Price fetch error: {e}")   
+        
     def _configure_style(self):
         style = ttk.Style()
         try:
@@ -53,6 +248,8 @@ class StockTradingGUI:
         style.map("Accent.TButton", background=[("active", self.colors["brand2"])])
         style.configure("Soft.TButton", padding=8, font=("Segoe UI", 10))
 
+    
+    
     def _build_layout(self):
         header = tk.Frame(self.root, bg=self.colors["brand"], height=72)
         header.pack(fill="x")
@@ -83,6 +280,7 @@ class StockTradingGUI:
         self._build_compare_tab()
         self._build_trade_tab()
         self._build_log_tab()
+        
 
     def _section(self, parent, title):
         outer = tk.Frame(parent, bg=self.colors["bg"])
@@ -132,91 +330,71 @@ class StockTradingGUI:
         self._labeled_entry(form, "Period", self.single_period, 1)
         self._labeled_entry(form, "Interval", self.single_interval, 2)
         self._labeled_entry(form, "Output Folder", self.single_output, 3, width=30)
+        self.days_input = tk.StringVar(value="30")
+        self._labeled_entry(form, "Days (Data Length)", self.days_input, 4)
+        
+        
+        # 🔥 --- CURRENT PRICE UI ADD ---
+        self.current_price_var = tk.StringVar(value="0.00")
 
+        tk.Label(form, text="Current Price", bg=self.colors["panel"], fg=self.colors["ink"]).grid(row=4, column=0, sticky="w", pady=6)
+        tk.Label(form, textvariable=self.current_price_var, fg="green",
+                font=("Segoe UI", 10, "bold")).grid(row=4, column=1, sticky="w", pady=6)
+
+        # 🔽 Button row shifted नीचे
         btnrow = tk.Frame(form, bg=self.colors["panel"])
-        btnrow.grid(row=4, column=0, columnspan=3, sticky="w", pady=(8, 0))
-        ttk.Button(btnrow, text="Browse", command=self._browse_single_output, style="Soft.TButton").pack(side="left", padx=(0, 8))
-        ttk.Button(btnrow, text="Analyze Share", command=self.run_single_analysis, style="Accent.TButton").pack(side="left")
+        btnrow.grid(row=5, column=0, columnspan=3, sticky="w", pady=(8, 0))
+        ttk.Button(btnrow, text="Browse", command=self._browse_single_output,
+                style="Soft.TButton").pack(side="left", padx=(0, 8))
+        ttk.Button(btnrow, text="Analyze Share", command=self.run_single_analysis,
+                style="Accent.TButton").pack(side="left")
 
+        # ---------------- RIGHT SIDE ----------------
         right = tk.Frame(top, bg=self.colors["bg"])
         right.pack(side="left", fill="both", expand=True)
+
         preview_wrap, preview_content = self._section(right, "Chart Preview")
         preview_wrap.pack(fill="both", expand=True)
 
         self.single_chart_choice = tk.StringVar(value="")
         select_row = tk.Frame(preview_content, bg=self.colors["panel"])
         select_row.pack(fill="x", pady=(0, 8))
-        tk.Label(select_row, text="Chart:", bg=self.colors["panel"], fg=self.colors["ink"]).pack(side="left")
-        self.single_chart_combo = ttk.Combobox(select_row, textvariable=self.single_chart_choice, width=36, state="readonly")
+
+        tk.Label(select_row, text="Chart:", bg=self.colors["panel"],
+                fg=self.colors["ink"]).pack(side="left")
+
+        self.single_chart_combo = ttk.Combobox(
+            select_row,
+            textvariable=self.single_chart_choice,
+            width=36,
+            state="readonly"
+        )
         self.single_chart_combo.pack(side="left", padx=8)
-        self.single_chart_combo.bind("<<ComboboxSelected>>", lambda e: self.update_single_chart())
+        self.single_chart_combo.bind("<<ComboboxSelected>>",
+                                    lambda e: self.update_single_chart())
 
         self.single_fig = Figure(figsize=(7.2, 4.4), dpi=100)
         self.single_ax = self.single_fig.add_subplot(111)
+
         self.single_canvas = FigureCanvasTkAgg(self.single_fig, master=preview_content)
         self.single_canvas.get_tk_widget().pack(fill="both", expand=True)
 
+        # ---------------- BOTTOM TABLE ----------------
         bottom = tk.Frame(self.tab_analyze, bg=self.colors["bg"])
         bottom.pack(fill="both", expand=True, padx=8, pady=(0, 8))
+
         stats_wrap, stats_content = self._section(bottom, "Statistics Table")
         stats_wrap.pack(fill="both", expand=True)
+
         self.single_stats_frame, self.single_stats_tree = self._build_treeview(
             stats_content,
-            columns=("Column", "Count", "Mean", "Median", "Min", "Q1", "Q2", "Q3", "Max", "StdDev"),
+            columns=("Column", "Count", "Mean", "Median", "Min",
+                    "Q1", "Q2", "Q3", "Max", "StdDev"),
         )
         self.single_stats_frame.pack(fill="both", expand=True)
+      
+    
 
-    def _build_compare_tab(self):
-        top = tk.Frame(self.tab_compare, bg=self.colors["bg"])
-        top.pack(fill="x", padx=8, pady=8)
-
-        left_wrap, form = self._section(top, "Inputs")
-        left_wrap.pack(side="left", fill="y", padx=(0, 8))
-
-        self.compare_ticker1 = tk.StringVar(value="RELIANCE.NS")
-        self.compare_ticker2 = tk.StringVar(value="TCS.NS")
-        self.compare_period = tk.StringVar(value="1mo")
-        self.compare_interval = tk.StringVar(value="1d")
-        self.compare_output = tk.StringVar(value="stock_compare_output")
-
-        self._labeled_entry(form, "Ticker 1", self.compare_ticker1, 0)
-        self._labeled_entry(form, "Ticker 2", self.compare_ticker2, 1)
-        self._labeled_entry(form, "Period", self.compare_period, 2)
-        self._labeled_entry(form, "Interval", self.compare_interval, 3)
-        self._labeled_entry(form, "Output Folder", self.compare_output, 4, width=30)
-
-        btnrow = tk.Frame(form, bg=self.colors["panel"])
-        btnrow.grid(row=5, column=0, columnspan=3, sticky="w", pady=(8, 0))
-        ttk.Button(btnrow, text="Browse", command=self._browse_compare_output, style="Soft.TButton").pack(side="left", padx=(0, 8))
-        ttk.Button(btnrow, text="Compare Shares", command=self.run_comparison, style="Accent.TButton").pack(side="left")
-
-        right = tk.Frame(top, bg=self.colors["bg"])
-        right.pack(side="left", fill="both", expand=True)
-        preview_wrap, preview_content = self._section(right, "Comparison Chart Preview")
-        preview_wrap.pack(fill="both", expand=True)
-
-        self.compare_chart_choice = tk.StringVar(value="")
-        row = tk.Frame(preview_content, bg=self.colors["panel"])
-        row.pack(fill="x", pady=(0, 8))
-        tk.Label(row, text="Chart:", bg=self.colors["panel"], fg=self.colors["ink"]).pack(side="left")
-        self.compare_chart_combo = ttk.Combobox(row, textvariable=self.compare_chart_choice, width=36, state="readonly")
-        self.compare_chart_combo.pack(side="left", padx=8)
-        self.compare_chart_combo.bind("<<ComboboxSelected>>", lambda e: self.update_compare_chart())
-
-        self.compare_fig = Figure(figsize=(7.2, 4.4), dpi=100)
-        self.compare_ax = self.compare_fig.add_subplot(111)
-        self.compare_canvas = FigureCanvasTkAgg(self.compare_fig, master=preview_content)
-        self.compare_canvas.get_tk_widget().pack(fill="both", expand=True)
-
-        bottom = tk.Frame(self.tab_compare, bg=self.colors["bg"])
-        bottom.pack(fill="both", expand=True, padx=8, pady=(0, 8))
-        compare_wrap, compare_content = self._section(bottom, "Comparison Summary")
-        compare_wrap.pack(fill="both", expand=True)
-        self.compare_frame, self.compare_tree = self._build_treeview(
-            compare_content,
-            columns=("Column", "Mean1", "Mean2", "Std1", "Std2", "Min1", "Min2", "Max1", "Max2"),
-        )
-        self.compare_frame.pack(fill="both", expand=True)
 
     def _summary_card(self, parent, title, var, r, c):
         card = tk.Frame(parent, bg=self.colors["panel2"], highlightbackground=self.colors["line"], highlightthickness=1, padx=14, pady=12)
@@ -361,6 +539,8 @@ class StockTradingGUI:
                     self.single_output.get().strip() or "stock_output",
                 )
                 self.current_analysis_result = result
+                self.root.after(0, self.update_current_price)
+
                 self.root.after(0, self.populate_single_analysis)
                 self.root.after(0, lambda: messagebox.showinfo("Done", f"Analysis completed for {result['share']}"))
                 self.log(f"Analysis completed for {result['share']}")
@@ -403,6 +583,7 @@ class StockTradingGUI:
                 (name == "Volume" and "Volume" in df.columns) or
                 (name == "Daily Return %" and "Daily Return %" in df.columns) or
                 (name == "Histogram" and "Close" in df.columns))
+        
 
     def update_single_chart(self):
         if not self.current_analysis_result:
@@ -678,7 +859,7 @@ class StockTradingGUI:
             return f"{float(x):,.2f}"
         except Exception:
             return str(x)
-
+    
     def _fmt(self, x):
         try:
             return f"{float(x):.4f}"

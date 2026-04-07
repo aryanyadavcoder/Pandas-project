@@ -1,12 +1,21 @@
 {
   "ahu": {
-    "cash": 69868.7998046875,
+    "cash": 46717.49951171875,
     "portfolio": {
       "RELIANCE.NS": {
-        "quantity": 22,
-        "avg_buy_price": 1369.6783187389374
+        "quantity": 25,
+        "avg_buy_price": 1367.30892244339
+      },
+      "TCS.NS": {
+        "quantity": 10,
+        "avg_buy_price": 2408.25
       }
     },
     "created_at": "2026-04-01T15:03:57.103169"
+  },
+  "prince kumar": {
+    "cash": 9997.60009765625,
+    "portfolio": {},
+    "created_at": "2026-04-02T11:51:54.622211"
   }
 }

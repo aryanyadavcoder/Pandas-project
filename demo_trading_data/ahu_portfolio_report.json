@@ -1,19 +1,28 @@
 {
   "username": "ahu",
-  "cash": 69868.7998046875,
+  "cash": 46717.49951171875,
   "holdings": [
     {
       "ticker": "RELIANCE.NS",
-      "quantity": 22,
-      "avg_buy_price": 1369.6783187389374,
-      "current_price": 1370.0,
-      "cost_value": 30132.923012256622,
-      "market_value": 30140.0,
-      "pnl": 7.0769877433776855
+      "quantity": 25,
+      "avg_buy_price": 1367.30892244339,
+      "current_price": 1350.5,
+      "cost_value": 34182.72306108475,
+      "market_value": 33762.5,
+      "pnl": -420.2230610847473
+    },
+    {
+      "ticker": "TCS.NS",
+      "quantity": 10,
+      "avg_buy_price": 2408.25,
+      "current_price": 2450.699951171875,
+      "cost_value": 24082.5,
+      "market_value": 24506.99951171875,
+      "pnl": 424.49951171875
     }
   ],
-  "total_market_value": 30140.0,
-  "total_portfolio_value": 100008.7998046875,
-  "total_pnl": 7.0769877433776855,
-  "generated_at": "2026-04-01T15:26:37.293522"
+  "total_market_value": 58269.49951171875,
+  "total_portfolio_value": 104986.9990234375,
+  "total_pnl": 4.2764506340026855,
+  "generated_at": "2026-04-03T11:32:18.617083"
 }
