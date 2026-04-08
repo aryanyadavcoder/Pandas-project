@@ -187,5 +187,23 @@
     "price": 1306.5,
     "total": 1306.5,
     "timestamp": "2026-04-07T15:25:36.207226"
+  },
+  {
+    "type": "buy",
+    "username": "Aryan",
+    "ticker": "RELIANCE.NS",
+    "quantity": 1,
+    "price": 1346.0,
+    "total": 1346.0,
+    "timestamp": "2026-04-08T11:08:06.236940"
+  },
+  {
+    "type": "sell",
+    "username": "Aryan",
+    "ticker": "RELIANCE.NS",
+    "quantity": 1,
+    "price": 1346.0999755859375,
+    "total": 1346.0999755859375,
+    "timestamp": "2026-04-08T11:09:03.080975"
   }
 ]
