@@ -156,22 +156,6 @@ def _save_line_chart(x, y, title, xlabel, ylabel, file_path):
     plt.close()
 
 
-def update_current_price(self):
-    try:
-        ticker = self.single_ticker.get().strip()
-        data = yf.Ticker(ticker).history(period="1d")
-
-        if not data.empty:
-            price = data["Close"].iloc[-1]
-            self.current_price_var.set(f"{price:.2f}")
-            self.log(f"Current price updated: {price:.2f}")
-        else:
-            self.current_price_var.set("N/A")
-
-    except Exception as e:
-        self.current_price_var.set("Error")
-        self.log(f"Price fetch error: {e}")
-
 def _save_single_share_charts(df: pd.DataFrame, share_name: str, prefix: str, output_dir: str) -> list:
     chart_files = []
     if "Close" in df.columns:
@@ -403,14 +387,22 @@ def analyze_two_shares(share1: str, share2: str, period: str = "1mo", interval: 
 
 
 class DemoTradingApp:
-   def __init__(self, data_dir: str = None):
-    import os
+    def __init__(self, data_dir: str = None):
+        if data_dir is None:
+            data_dir = os.path.join(os.path.expanduser("~"), "demo_trading_data")
 
-    if data_dir is None:
-        data_dir = os.path.join(os.path.expanduser("~"), "demo_trading_data")
+        self.data_dir = data_dir
+        _ensure_dir(self.data_dir)
 
-    self.data_dir = data_dir
-    _ensure_dir(self.data_dir)
+        self.users_file = os.path.join(self.data_dir, "users.json")
+        self.transactions_file = os.path.join(self.data_dir, "transactions.json")
+        self.snapshots_dir = os.path.join(self.data_dir, "market_snapshots")
+
+        _ensure_dir(self.snapshots_dir)
+
+        # load data
+        self.users = _load_json(self.users_file, {})
+        self.transactions = _load_json(self.transactions_file, [])
     def _save_state(self):
         _save_json(self.users, self.users_file)
         _save_json(self.transactions, self.transactions_file)
