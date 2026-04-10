@@ -251,22 +251,7 @@ def analyze_share(share_name: str, period: str = "1mo", interval: str = "1d", ou
         "chart_files": chart_files,
     }
     
-    
-def update_current_price(self):
-    try:
-        ticker = self.single_ticker.get().strip()
-        data = yf.Ticker(ticker).history(period="1d")
-
-        if not data.empty:
-            price = data["Close"].iloc[-1]
-            self.current_price_var.set(f"{price:.2f}")
-            self.log(f"Current price updated: {price:.2f}")
-        else:
-            self.current_price_var.set("N/A")
-
-    except Exception as e:
-        self.current_price_var.set("Error")
-        self.log(f"Price fetch error: {e}")         
+         
 
 
 def analyze_two_shares(share1: str, share2: str, period: str = "1mo", interval: str = "1d", output_dir: str = "stock_compare_output"):
@@ -389,7 +374,10 @@ def analyze_two_shares(share1: str, share2: str, period: str = "1mo", interval: 
 class DemoTradingApp:
     def __init__(self, data_dir: str = None):
         if data_dir is None:
-            data_dir = os.path.join(os.path.expanduser("~"), "demo_trading_data")
+            data_dir = os.path.join(
+                os.environ.get("APPDATA", os.path.expanduser("~")),
+                "demo_trading_data"
+            )
 
         self.data_dir = data_dir
         _ensure_dir(self.data_dir)
@@ -406,6 +394,24 @@ class DemoTradingApp:
     def _save_state(self):
         _save_json(self.users, self.users_file)
         _save_json(self.transactions, self.transactions_file)
+        
+      
+    def update_current_price(self):
+        try:
+            ticker = self.single_ticker.get().strip()
+            data = yf.Ticker(ticker).history(period="1d")
+
+            if not data.empty:
+                price = data["Close"].iloc[-1]
+                self.current_price_var.set(f"{price:.2f}")
+                self.log(f"Current price updated: {price:.2f}")
+            else:
+                self.current_price_var.set("N/A")
+
+        except Exception as e:
+            self.current_price_var.set("Error")
+            self.log(f"Price fetch error: {e}")      
+        
 
     def create_user(self, username: str, starting_cash: float = 100000.0):
         if not username.strip():
