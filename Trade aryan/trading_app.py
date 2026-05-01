@@ -203,7 +203,7 @@ class StockTradingGUI:
         self.compare_canvas.get_tk_widget().pack(fill="both", expand=True)
 
         # Bottom Table
-        bottom = tk.Frame(self.tab_compare, bg=self.colors["bg"])
+        bottom = tk.Frame(self.tab_compare, bg=self.colors["bg"])   
         bottom.pack(fill="both", expand=True, padx=8, pady=(0, 8))
         compare_wrap, compare_content = self._section(bottom, "Comparison Summary")
         compare_wrap.pack(fill="both", expand=True)

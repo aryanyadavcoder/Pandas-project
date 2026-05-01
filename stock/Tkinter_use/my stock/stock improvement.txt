@@ -1,0 +1,3 @@
+1- targeting
+2 - look upta (pin data)
+3 - ak se jada month,year ka data serch and show date show data

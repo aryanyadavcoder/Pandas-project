@@ -47,10 +47,10 @@ def findCorrelation(sigmax, sigmay, sigmaxy, sigmax2, sigmay2, n):
 def line(x, a, b):
     return a + b * x
 
-data = yf.download("TCS.NS", start="2025-12-09", end="2026-03-10")
+data = pd.read_csv("sales_data.csv")
 
-y = data['Close'].values
-x = np.arange(len(y))
+x = data["Month"]
+y = data["Sales"]
 sx, sy, sxy, sx2,sy2 = calculateAllSigma(x, y)
 
 n = len(x)
