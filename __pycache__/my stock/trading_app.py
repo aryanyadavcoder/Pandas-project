@@ -259,7 +259,31 @@ class StockTradingGUI:
                  font=("Segoe UI", 20, "bold")).pack(side="left", padx=18)
         tk.Label(header, text="Analysis • Comparison • Demo Trading • Table View • Chart Preview",
                  bg=self.colors["brand"], fg="#fff5e6", font=("Segoe UI", 10)).pack(side="left", padx=8, pady=6)
+        self.market_strip = tk.Frame(
+            self.root,
+            bg="#1f2937",
+            height=40
+        )
 
+        self.market_strip.pack(
+            fill="x"
+        )
+        self.market_canvas = tk.Canvas(
+            self.market_strip,
+            bg="#1f2937",
+            height=35,
+            highlightthickness=0
+        )
+
+        self.market_canvas.pack(
+            fill="x",
+            expand=True
+        )
+
+        self.market_x = 1400
+
+        self.update_market_strip()
+        
         body = tk.Frame(self.root, bg=self.colors["bg"])
         body.pack(fill="both", expand=True, padx=12, pady=12)
 
@@ -334,7 +358,6 @@ class StockTradingGUI:
         self._labeled_entry(form, "Days (Data Length)", self.days_input, 4)
         
         
-        # 🔥 --- CURRENT PRICE UI ADD ---
         self.current_price_var = tk.StringVar(value="0.00")
 
         tk.Label(form, text="Current Price", bg=self.colors["panel"], fg=self.colors["ink"]).grid(row=4, column=0, sticky="w", pady=6)
@@ -404,7 +427,7 @@ class StockTradingGUI:
         tk.Label(card, text=title, bg=self.colors["panel2"], fg=self.colors["muted"], font=("Segoe UI", 10, "bold")).pack(anchor="w")
         tk.Label(card, textvariable=var, bg=self.colors["panel2"], fg=self.colors["ink"], font=("Segoe UI", 18, "bold")).pack(anchor="w", pady=(6, 0))
 
-    def _build_trade_tab(self):
+    def _build_trade_tab(self): 
         top = tk.Frame(self.tab_trade, bg=self.colors["bg"])
         top.pack(fill="x", padx=8, pady=8)
 
@@ -416,9 +439,11 @@ class StockTradingGUI:
         self.trade_ticker = tk.StringVar(value="RELIANCE.NS")
         self.trade_qty = tk.StringVar(value="1")
         
-        # --- ADDED: Auto-Trade Variables ---
+        # Auto trading
         self.trade_target_price = tk.StringVar(value="0.00")
-        self.auto_trade_active = tk.BooleanVar(value=False)
+        self.auto_trade_active = tk.BooleanVar(value=False) 
+        self.target_mode = tk.StringVar(value="Fixed Price")
+        self.trade_target_percent = tk.StringVar(value="5")
 
         tk.Label(user_content, text="User", bg=self.colors["panel"], fg=self.colors["ink"]).grid(row=0, column=0, sticky="w", pady=6)
         self.user_combo = ttk.Combobox(user_content, textvariable=self.trade_user, width=26)
@@ -434,25 +459,63 @@ class StockTradingGUI:
         tk.Entry(user_content, textvariable=self.trade_qty, width=28, relief="solid", bd=1).grid(row=3, column=1, sticky="w", pady=6)
 
         # --- ADDED: Target Price & Checkbutton UI ---
-        tk.Label(user_content, text="Target Price", bg=self.colors["panel"], fg=self.colors["ink"]).grid(row=4, column=0, sticky="w", pady=6)
-        tk.Entry(user_content, textvariable=self.trade_target_price, width=28, relief="solid", bd=1, fg="blue").grid(row=4, column=1, sticky="w", pady=6)
+        tk.Label(
+            user_content,
+            text="Target Price",
+            bg=self.colors["panel"],
+            fg=self.colors["ink"]
+        ).grid(
+            row=4,
+            column=0,
+            sticky="w",
+            pady=6
+        )
 
-        tk.Checkbutton(user_content, text="Enable Auto-Trade", variable=self.auto_trade_active, 
-                       bg=self.colors["panel"], fg=self.colors["brand"]).grid(row=5, column=0, columnspan=2, pady=5, sticky="w")
+        tk.Entry(
+            user_content,
+            textvariable=self.trade_target_price,
+            width=28
+        ).grid(
+            row=4,
+            column=1,
+            sticky="w",
+            pady=6
+        )
+        
+        ttk.Combobox(
+            user_content,
+            textvariable=self.target_mode,
+            values=["Fixed Price","Percentage"],
+            state="readonly",
+            width=25
+        ).grid(row=5,column=1,sticky="w")
+
+        tk.Label(
+            user_content,
+            text="Target Percentage(%)",
+            bg=self.colors["panel"]
+        ).grid(row=6,column=0,sticky="w")
+
+        tk.Entry(
+            user_content,
+            textvariable=self.trade_target_percent,
+            width=28
+        ).grid(row=6,column=1,sticky="w")
+        tk.Checkbutton(user_content, text="Enable Auto-Trade", variable=self.auto_trade_active, bg=self.colors["panel"], fg=self.colors["brand"]).grid(row=5, column=0, columnspan=2, pady=5, sticky="w")
 
         btnrow1 = tk.Frame(user_content, bg=self.colors["panel"])
-        btnrow1.grid(row=6, column=0, columnspan=2, sticky="w", pady=(10, 4))
+        btnrow1.grid(row=8, column=0, columnspan=2, sticky="w", pady=(10, 4))
         ttk.Button(btnrow1, text="Create User", command=self.create_user, style="Soft.TButton").pack(side="left", padx=(0, 8))
         ttk.Button(btnrow1, text="Deposit Cash", command=self.deposit_cash, style="Soft.TButton").pack(side="left")
 
         btnrow2 = tk.Frame(user_content, bg=self.colors["panel"])
-        btnrow2.grid(row=7, column=0, columnspan=2, sticky="w", pady=4)
+        btnrow2.grid(row=9, column=0, columnspan=2, sticky="w", pady=4)
         ttk.Button(btnrow2, text="Buy", command=self.buy_share, style="Accent.TButton").pack(side="left", padx=(0, 8))
         ttk.Button(btnrow2, text="Sell", command=self.sell_share, style="Soft.TButton").pack(side="left", padx=(0, 8))
         ttk.Button(btnrow2, text="Market Snapshot", command=self.save_snapshot, style="Soft.TButton").pack(side="left")
 
         btnrow3 = tk.Frame(user_content, bg=self.colors["panel"])
-        btnrow3.grid(row=8, column=0, columnspan=2, sticky="w", pady=4)
+        btnrow3.grid(row=10, column=0, columnspan=2, sticky="w", pady=4)
         ttk.Button(btnrow3, text="Refresh Portfolio", command=self.refresh_portfolio, style="Soft.TButton").pack(side="left", padx=(0, 8))
         ttk.Button(btnrow3, text="Refresh Transactions", command=self.refresh_transactions, style="Soft.TButton").pack(side="left")
 
@@ -765,10 +828,19 @@ class StockTradingGUI:
 
     # --- ADDED: New Algo Logic Method ---
     def _run_algo_logic(self, mode):
-        target = float(self.trade_target_price.get())
         ticker = self.trade_ticker.get().strip()
         user = self.trade_user.get().strip()
         qty = int(self.trade_qty.get())
+
+        if self.target_mode.get()=="Fixed Price":
+            target=float(self.trade_target_price.get())
+        else:
+            percent=float(self.trade_target_percent.get())
+            current_price=yf.Ticker(ticker).history(period="1d")["Close"].iloc[-1]
+            if mode=="BUY":
+                target=current_price*(1-percent/100)
+            else:
+                target=current_price*(1+percent/100)     
         self.log(f"ALGO START: Waiting for {ticker} to hit {target} to {mode}")
         
         while self.auto_trade_active.get():
@@ -853,7 +925,58 @@ class StockTradingGUI:
                 self.root.after(0, lambda: messagebox.showerror("Error", str(e)))
                 self.log(f"Snapshot error: {e}")
         self._run_in_thread(task)
+        
+        
+    def update_market_strip(self):
+        def task():
+            try:
+                stocks = [
+                    "RELIANCE.NS","TCS.NS","INFY.NS","HDFCBANK.NS",
+                    "ICICIBANK.NS","SBIN.NS","ITC.NS","BHARTIARTL.NS"
+                ]
 
+                data_list = []
+
+                for s in stocks:
+                    df = yf.Ticker(s).history(period="2d")
+                    if len(df) >= 2:
+                        prev = df["Close"].iloc[-2]
+                        curr = df["Close"].iloc[-1]
+                        change = ((curr - prev) / prev) * 100
+                        data_list.append((s, curr, change))
+
+                # UI update ONLY in main thread
+                def draw():
+                    self.market_canvas.delete("all")
+                    x = self.market_x
+
+                    for s, curr, change in data_list:
+                        color = "green" if change > 0 else "red"
+                        text = f"{s} ₹{curr:.2f} ({change:+.2f}%)"
+
+                        item = self.market_canvas.create_text(
+                            x, 18,
+                            text=text,
+                            fill=color,
+                            anchor="w",
+                            font=("Segoe UI", 10, "bold")
+                        )
+
+                        box = self.market_canvas.bbox(item)
+                        x = box[2] + 50
+
+                    self.market_x -= 50   #  slow smooth movement (important!)
+                    if self.market_x < -1000:
+                        self.market_x = 1400
+
+                self.root.after(0, draw)
+
+            except Exception as e:
+                self.log(f"Market Error: {e}")
+
+            self.root.after(500, self.update_market_strip)  # smoother refresh
+
+        threading.Thread(target=task, daemon=True).start()
     def _money(self, x):
         try:    
             return f"{float(x):,.2f}"
