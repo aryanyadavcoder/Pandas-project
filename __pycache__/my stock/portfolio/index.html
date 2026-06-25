@@ -1,0 +1,681 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<h2><title>TradeWithAryan</title></h2>
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Segoe UI',sans-serif;
+}
+
+html{
+scroll-behavior:smooth;
+}
+
+body{
+background:#f4f7fc;
+color:#1e293b;
+}
+
+/* Navbar */
+
+header{
+background:#0f172a;
+padding:18px 60px;
+position:sticky;
+top:0;
+z-index:1000;
+box-shadow:0 2px 15px rgba(0,0,0,.08);
+}
+
+.nav{
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
+.logo{
+display:flex;
+align-items:center;
+gap:15px;
+}
+
+.logo img{
+width:100px;
+height:100px;
+border-radius:50%;
+object-fit:cover;
+}
+
+.logo h1{
+color:white;
+font-size:28px;
+}
+
+.menu a{
+text-decoration:none;
+margin-left:25px;
+color:#cbd5e1;
+font-weight:500;
+transition:.3s;
+}
+
+.menu a:hover{
+color:#60a5fa;
+}
+
+/* Hero */
+
+.hero{
+padding:80px 60px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+
+background:linear-gradient(
+135deg,
+#0f172a,
+#1e293b
+);
+}
+
+.hero-text{
+width:50%;
+}
+
+.tag{
+display:inline-block;
+background:#1e293b;
+color:#60a5fa;
+
+padding:10px 16px;
+border-radius:30px;
+
+margin-bottom:20px;
+}
+
+.hero h2{
+font-size:52px;
+color:white;
+margin-bottom:20px;
+line-height:1.2;
+}
+
+.hero p{
+color:#cbd5e1;
+line-height:1.8;
+margin-bottom:30px;
+}
+
+.hero img{
+width:300px;
+border-radius:20px;
+
+box-shadow:
+0 10px 30px rgba(0,0,0,.2);
+}
+
+.btn{
+display:inline-block;
+
+padding:14px 22px;
+
+border-radius:8px;
+
+text-decoration:none;
+
+background:#2563eb;
+color:white;
+
+margin-right:15px;
+
+transition:.3s;
+}
+
+.btn:hover{
+background:#1d4ed8;
+transform:translateY(-2px);
+}
+
+.btn2{
+background:#334155;
+}
+
+/* Stats */
+
+.stats{
+padding:60px;
+
+display:grid;
+
+grid-template-columns:
+repeat(auto-fit,minmax(200px,1fr));
+
+gap:20px;
+}
+
+.stat-box{
+background:white;
+
+padding:25px;
+
+border-radius:15px;
+
+text-align:center;
+
+box-shadow:
+0 5px 15px rgba(0,0,0,.05);
+
+transition:.3s;
+}
+
+.stat-box:hover{
+transform:translateY(-5px);
+}
+
+.stat-box h3{
+font-size:35px;
+color:#2563eb;
+}
+
+/* Features */
+
+.container{
+padding:60px;
+}
+
+.container h2{
+margin-bottom:25px;
+}
+
+.feature-box{
+background:white;
+
+margin-bottom:15px;
+
+border-radius:15px;
+
+overflow:hidden;
+
+box-shadow:
+0 4px 10px rgba(0,0,0,.05);
+}
+
+.feature-btn{
+width:100%;
+border:none;
+
+padding:20px;
+
+background:white;
+
+cursor:pointer;
+
+display:flex;
+justify-content:space-between;
+align-items:center;
+
+font-size:18px;
+font-weight:600;
+}
+
+.feature-btn:hover{
+background:#f8fafc;
+}
+
+.feature-content{
+
+max-height:0;
+overflow:hidden;
+
+padding:0 20px;
+
+color:#64748b;
+
+transition:
+max-height .5s ease,
+padding .5s ease;
+}
+
+.feature-box.active .feature-content{
+
+max-height:200px;
+padding:20px;
+}
+
+.feature-box.active i{
+
+transform:rotate(180deg);
+}
+
+i{
+transition:.4s;
+}
+
+/* Screenshots */
+
+.images{
+display:grid;
+
+grid-template-columns:
+repeat(auto-fit,minmax(240px,1fr));
+
+gap:25px;
+
+margin-top:30px;
+}
+
+.images img{
+width:100%;
+
+border-radius:15px;
+
+box-shadow:
+0 5px 15px rgba(0,0,0,.08);
+
+transition:.4s;
+}
+
+.images img:hover{
+transform:scale(1.04);
+}
+
+/* Download Card */
+
+.card{
+background:white;
+
+padding:30px;
+
+margin-top:50px;
+
+border-radius:15px;
+
+box-shadow:
+0 5px 15px rgba(0,0,0,.05);
+}
+
+/* Footer */
+
+footer{
+margin-top:50px;
+
+padding:40px;
+
+background:#0f172a;
+
+text-align:center;
+
+color:#cbd5e1;
+}
+
+footer h3{
+color:white;
+margin-bottom:10px;
+}
+
+/* Whatsapp */
+
+.whatsapp{
+
+position:fixed;
+
+bottom:20px;
+right:20px;
+
+width:60px;
+height:60px;
+
+background:#25D366;
+
+display:flex;
+justify-content:center;
+align-items:center;
+
+border-radius:50%;
+
+font-size:30px;
+
+color:white;
+
+text-decoration:none;
+}
+
+@media(max-width:768px){
+
+.hero{
+flex-direction:column;
+text-align:center;
+}
+
+.hero-text{
+width:100%;
+margin-bottom:30px;
+}
+
+.nav{
+flex-direction:column;
+gap:15px;
+}
+
+.hero h2{
+font-size:35px;
+}
+
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+
+<div class="nav">
+
+<div class="logo">
+
+<img src="pic/stock.jpeg">
+<h1>Trade Aryan</h1>
+
+</div>
+
+<div class="menu">
+
+<a href="#home">Home</a>
+<a href="#features">Features</a>
+<a href="#download">Download</a>
+<a href="#about">About</a>
+
+</div>
+
+</div>
+
+</header>
+
+<section class="hero" id="home">
+
+<div class="hero-text">
+
+<span class="tag">
+📊 Smart Trading Platform
+</span>
+
+<h2>
+Stock Trading & Market Analysis
+</h2>
+
+<p>
+Trade Aryan helps users analyze stock trends,
+practice strategies and understand the market
+through a modern interface.
+</p>
+
+<a href="https://aryanyadavcoder.github.io/Pandas-project/"
+class="btn">
+
+Download App
+
+</a>
+
+<a href="https://github.com/aryanyadavcoder/Stock-Trading-app"
+class="btn btn2">
+
+GitHub
+
+</a>
+
+</div>
+
+<img src="pic/logo.jpeg">
+
+</section>
+
+<div class="stats">
+
+<div class="stat-box">
+<h3>50+</h3>
+<p>Stocks</p>
+</div>
+
+<div class="stat-box">
+<h3>100%</h3>
+<p>Demo Safe</p>
+</div>
+
+<div class="stat-box">
+<h3>24/7</h3>
+<p>Analysis</p>
+</div>
+
+<div class="stat-box">
+<h3>AI</h3>
+<p>Trading Logic</p>
+</div>
+
+</div>
+
+
+<!-- Features -->
+
+<div class="container" id="features">
+
+<h2>🚀 Platform Features</h2>
+
+<div class="feature-box">
+<button class="feature-btn">
+📈 Real Time Stock Tracking
+<i class="fa-solid fa-chevron-down"></i>
+</button>
+
+<div class="feature-content">
+Track live stock prices and continuously monitor market movement.
+</div>
+</div>
+
+
+<div class="feature-box">
+<button class="feature-btn">
+📊 Stock Analysis
+<i class="fa-solid fa-chevron-down"></i>
+</button>
+
+<div class="feature-content">
+Analyze stock data including mean, median, statistics and price trends.
+</div>
+</div>
+
+
+<div class="feature-box">
+<button class="feature-btn">
+📉 Multiple Chart Visualizations
+<i class="fa-solid fa-chevron-down"></i>
+</button>
+
+<div class="feature-content">
+Supports Line Chart, Bar Chart, Scatter Chart and Histogram visualization.
+</div>
+</div>
+
+
+<div class="feature-box">
+<button class="feature-btn">
+⚖️ Compare Two Stocks
+<i class="fa-solid fa-chevron-down"></i>
+</button>
+
+<div class="feature-content">
+Compare two stocks and analyze performance side by side.
+</div>
+</div>
+
+
+<div class="feature-box">
+<button class="feature-btn">
+📅 Group Average Analysis
+<i class="fa-solid fa-chevron-down"></i>
+</button>
+
+<div class="feature-content">
+Calculate 2-day or 7-day grouped average stock trends.
+</div>
+</div>
+
+
+<div class="feature-box">
+<button class="feature-btn">
+💼 Demo Trading System
+<i class="fa-solid fa-chevron-down"></i>
+</button>
+
+<div class="feature-content">
+Practice stock trading safely using virtual money.
+</div>
+</div>
+
+
+<div class="feature-box">
+<button class="feature-btn">
+🤖 Auto Trading Logic
+<i class="fa-solid fa-chevron-down"></i>
+</button>
+
+<div class="feature-content">
+Automatically buy or sell shares using target price or percentage strategy.
+</div>
+</div>
+
+
+<div class="feature-box">
+<button class="feature-btn">
+💰 Portfolio Management
+<i class="fa-solid fa-chevron-down"></i>
+</button>
+
+<div class="feature-content">
+Manage holdings, cash balance, market value and profit/loss.
+</div>
+</div>
+
+
+<div class="feature-box">
+<button class="feature-btn">
+📝 Transaction History
+<i class="fa-solid fa-chevron-down"></i>
+</button>
+
+<div class="feature-content">
+Complete transaction logs with buy, sell and deposit records.
+</div>
+</div>
+
+
+<div class="feature-box">
+<button class="feature-btn">
+📡 Live Market Strip
+<i class="fa-solid fa-chevron-down"></i>
+</button>
+
+<div class="feature-content">
+Real-time moving ticker displaying stock market updates.
+</div>
+</div>
+
+
+<h2 style="margin-top:50px;">📸 Screenshots</h2>
+
+<div class="images">
+<img src="pic/1.png">
+<img src="pic/2.png">
+<img src="pic/3.png">
+<img src="pic/4.png">
+<img src="pic/5.png">
+
+</div>
+<div class="card" id="about">
+
+<h2>👨‍💻 About Me</h2>
+
+<p>
+Hello, I'm Aryan Yadav 👋  
+I am a Computer Science student and software developer.
+</p>
+
+<br>
+
+<a href="https://github.com/aryanyadavcoder" class="btn">
+View GitHub Profile
+</a>
+
+</div>
+
+<div class="card" id="download">
+
+<h2>Download App</h2>
+
+<a href="https://aryanyadavcoder.github.io/Pandas-project/"
+class="btn">
+
+Download Now
+
+</a>
+
+<a href="https://github.com/aryanyadavcoder/Stock-Trading-app"
+class="btn btn2">
+
+GitHub Project
+
+</a>
+
+</div>
+
+</div>
+
+<footer>
+
+<h3>Trade Aryan</h3>
+
+<p>Stock Trading & Analysis Platform</p>
+
+<p>© 2026 All Rights Reserved</p>
+
+</footer>
+
+<a class="whatsapp"
+href="https://wa.me/919250388496">
+
+<i class="fa-brands fa-whatsapp"></i>
+
+</a>
+
+<script>
+
+const features=
+document.querySelectorAll(".feature-box");
+
+features.forEach(box=>{
+
+box.querySelector(".feature-btn")
+.addEventListener("click",()=>{
+
+box.classList.toggle("active");
+
+});
+
+});
+
+</script>
+
+</body>
+</html>
+```

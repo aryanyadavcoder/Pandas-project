@@ -429,7 +429,7 @@ class StockTradingGUI:
 
     def _build_trade_tab(self): 
         top = tk.Frame(self.tab_trade, bg=self.colors["bg"])
-        top.pack(fill="both", expand=True, padx=8, pady=8)
+        top.pack(fill="both", padx=8, pady=8)
         left_wrap, user_content = self._section(top, "User & Trading Controls")
         left_wrap.pack(side="left", fill="y", padx=(0, 8))
 
@@ -454,7 +454,7 @@ class StockTradingGUI:
         tk.Label(user_content, text="Ticker", bg=self.colors["panel"], fg=self.colors["ink"]).grid(row=2, column=0, sticky="w", pady=6)
         tk.Entry(user_content, textvariable=self.trade_ticker, width=28, relief="solid", bd=1).grid(row=2, column=1, sticky="w", pady=6)
 
-        tk.Label(user_content, text="Quantity"  , bg=self.colors["panel"], fg=self.colors["ink"]).grid(row=3, column=0, sticky="w", pady=6)
+        tk.Label(user_content, text="Quantity", bg=self.colors["panel"], fg=self.colors["ink"]).grid(row=3, column=0, sticky="w", pady=6)
         tk.Entry(user_content, textvariable=self.trade_qty, width=28, relief="solid", bd=1).grid(row=3, column=1, sticky="w", pady=6)
 
         # --- ADDED: Target Price & Checkbutton UI ---
@@ -520,6 +520,8 @@ class StockTradingGUI:
 
         summary_wrap, summary_content = self._section(top, "Portfolio Summary")
         summary_wrap.pack(side="left", fill="both", expand=True)
+        top.pack_propagate(False)
+        top.configure(height=300)
         self.summary_vars = {
             "cash": tk.StringVar(value="0.00"),
             "market": tk.StringVar(value="0.00"),
@@ -531,27 +533,18 @@ class StockTradingGUI:
         self._summary_card(summary_content, "Holdings Value", self.summary_vars["market"], 0, 1)
         self._summary_card(summary_content, "Portfolio Value", self.summary_vars["total"], 1, 0)
         self._summary_card(summary_content, "PnL", self.summary_vars["pnl"], 1, 1)
+
         bottom = tk.Frame(self.tab_trade, bg=self.colors["bg"])
-        bottom.pack(fill="both", expand=True, padx=8, pady=(0,8))
-
-        bottom.grid_columnconfigure(0, weight=1)
-        bottom.grid_columnconfigure(1, weight=1)
-        bottom.grid_rowconfigure(0, weight=1)
-
+        bottom.pack(fill="both", expand=True, padx=8, pady=(0,8), side="bottom")
         left_bottom = tk.Frame(bottom, bg=self.colors["bg"])
-        left_bottom.grid(
-            row=0,
-            column=0,
-            sticky="nsew",
-            padx=(0,8)
-        )
-
+        left_bottom.pack(side="left", fill="both", expand=True, padx=(0, 8))
         right_bottom = tk.Frame(bottom, bg=self.colors["bg"])
-        right_bottom.grid(
-            row=0,
-            column=1,
-            sticky="nsew"
-        )
+        right_bottom.pack(side="left", fill="both", expand=True)
+        
+        left_bottom.pack_propagate(False)
+        right_bottom.pack_propagate(False)
+        left_bottom.configure(height=350)
+        right_bottom.configure(height=350)
 
         hold_wrap, hold_content = self._section(left_bottom, "Portfolio Holdings")
         hold_wrap.pack(fill="both", expand=True)
@@ -568,6 +561,9 @@ class StockTradingGUI:
             columns=("Time", "Type", "Ticker", "Qty", "Price", "Total"),
         )
         self.txn_frame.pack(fill="both", expand=True)
+        self.holdings_tree["height"] = 12
+        self.txn_tree["height"] = 12
+        self.root.after(1000, self.auto_refresh)
 
     def _build_log_tab(self):
         wrap, content = self._section(self.tab_log, "Application Log")
@@ -925,6 +921,15 @@ class StockTradingGUI:
         except Exception as e:
             messagebox.showerror("Error", str(e))
             self.log(f"Transactions error: {e}")
+            
+    def auto_refresh(self):
+        try:
+            self.refresh_portfolio()
+            self.refresh_transactions()
+        except Exception as e:
+            self.log(f"Refresh Error: {e}")
+
+        self.root.after(5000, self.auto_refresh)        
 
     def save_snapshot(self):
         def task():
