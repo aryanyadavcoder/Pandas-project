@@ -36,10 +36,50 @@ class StockTradingGUI:
         self.comp_group_start = tk.StringVar(value="2025-01-01")
         self.comp_group_end = tk.StringVar(value="2026-04-04")
         self.comp_group_size = tk.IntVar(value=2)
+        self.price_cache = {}   
 
         self._configure_style()
         self._build_layout()
         self.refresh_user_combo()
+        
+        
+    def get_fast_price(self, ticker):
+
+        current_time = time.time()
+
+        # 60 second cache
+        if ticker in self.price_cache:
+
+            price, timestamp = self.price_cache[ticker]
+
+            if current_time - timestamp < 60:
+                return price
+
+        try:
+
+            data = yf.Ticker(ticker).history(
+                period="1d"
+            )
+
+            if not data.empty:
+
+                price = float(
+                    data["Close"].iloc[-1]
+                )
+
+                self.price_cache[ticker] = (
+                    price,
+                    current_time
+                )
+
+                return price
+
+        except:
+            pass
+
+        return 0    
+        
+        
     def group_avg(self, data, group_size):
         result = []
         for i in range(0, len(data), group_size):
@@ -230,7 +270,312 @@ class StockTradingGUI:
 
         except Exception as e:
             self.current_price_var.set("Error")
-            self.log(f"Price fetch error: {e}")   
+            self.log(f"Price fetch error: {e}")  
+    def show_lookup_portfolio(self):
+
+        username = self.lookup_user.get().strip()
+
+        if not username:
+            messagebox.showerror(
+                "Error",
+                "Enter username"
+            )
+            return
+
+        def task():
+
+            try:
+
+                report = self.trading.get_portfolio_report(
+                    username
+                )
+
+                def update_ui():
+
+                    # transaction hide
+                    self.txn_wrap.pack_forget()
+
+                    # portfolio show
+                    self.hold_wrap.pack(
+                        fill="both",
+                        expand=True,
+                        pady=10
+                    )
+
+                    for item in self.lookup_hold_tree.get_children():
+                        self.lookup_hold_tree.delete(item)
+
+                    for h in report["holdings"]:
+
+                        self.lookup_hold_tree.insert(
+                            "",
+                            "end",
+                            values=(
+                                h["ticker"],
+                                h["quantity"],
+                                round(h["avg_buy_price"],2),
+                                round(h["current_price"],2),
+                                round(h["pnl"],2)
+                            )
+                        )
+
+                self.root.after(0, update_ui)
+
+            except Exception as e:
+                self.root.after(
+                    0,
+                    lambda: messagebox.showerror(
+                        "Error",
+                        str(e)
+                    )
+                )
+
+        threading.Thread(
+            target=task,
+            daemon=True
+        ).start()
+        
+
+
+    def show_lookup_transactions(self):
+
+        username = self.lookup_user.get().strip()
+
+        if not username:
+            messagebox.showerror(
+                "Error",
+                "Enter username"
+            )
+            return
+
+        def task():
+
+            try:
+
+                txns = self.trading.get_user_transactions(
+                    username
+                )
+
+                def update_ui():
+
+                    # hide portfolio
+                    self.hold_wrap.pack_forget()
+
+                    # show transactions
+                    self.txn_wrap.pack(
+                        fill="both",
+                        expand=True,
+                        pady=10
+                    )
+
+                    for item in self.lookup_txn_tree.get_children():
+                        self.lookup_txn_tree.delete(item)
+
+                    for txn in reversed(txns):
+
+                        self.lookup_txn_tree.insert(
+                            "",
+                            "end",
+                            values=(
+                                txn.get("timestamp",""),
+                                txn.get("type",""),
+                                txn.get("ticker",""),
+                                txn.get("quantity",""),
+                                txn.get("price","")
+                            )
+                        )
+
+                self.root.after(
+                    0,
+                    update_ui
+                )
+
+            except Exception as e:
+                self.root.after(
+                    0,
+                    lambda: messagebox.showerror(
+                        "Error",
+                        str(e)
+                    )
+                )
+
+        threading.Thread(
+            target=task,
+            daemon=True
+        ).start()
+                
+    def _build_lookup_tab(self):
+
+        top = tk.Frame(
+            self.tab_lookup,
+            bg=self.colors["bg"]
+        )
+
+        top.pack(
+            fill="both",
+            expand=True,
+            padx=10,
+            pady=10
+        )
+
+        # Search Area
+        left_wrap, content = self._section(
+            top,
+            "Search User Portfolio"
+        )
+
+        left_wrap.pack(fill="x")
+
+        self.lookup_user = tk.StringVar()
+
+        tk.Label(
+            content,
+            text="Enter User Name:",
+            bg=self.colors["panel"]
+        ).grid(
+            row=0,
+            column=0,
+            pady=10
+        )
+
+        tk.Entry(
+            content,
+            textvariable=self.lookup_user,
+            width=25
+        ).grid(
+            row=0,
+            column=1,
+            padx=10
+        )
+
+        ttk.Button(
+            content,
+            text="Show Portfolio",
+            command=self.show_lookup_portfolio,
+            style="Accent.TButton"
+        ).grid(
+            row=0,
+            column=2,
+            padx=5
+        )
+
+        ttk.Button(
+            content,
+            text="Show Transactions",
+            command=self.show_lookup_transactions,
+            style="Soft.TButton"
+        ).grid(
+            row=0,
+            column=3,
+            padx=5
+        )
+
+
+        # Portfolio Area
+        self.hold_wrap, hold_content = self._section(
+            top,
+            "Portfolio Holdings"
+        )
+
+        _, self.lookup_hold_tree = self._build_treeview(
+            hold_content,
+            columns=(
+                "Ticker",
+                "Qty",
+                "Avg Buy",
+                "Current",
+                "PnL"
+            )
+        )
+
+        self.lookup_hold_tree.master.pack(
+            fill="both",
+            expand=True
+        )
+
+
+        # Transaction Area
+        self.txn_wrap, txn_content = self._section(
+            top,
+            "Transaction History"
+        )
+
+        _, self.lookup_txn_tree = self._build_treeview(
+            txn_content,
+            columns=(
+                "Time",
+                "Type",
+                "Ticker",
+                "Qty",
+                "Price"
+            )
+        )
+
+        self.lookup_txn_tree.master.pack(
+            fill="both",
+            expand=True
+        )
+
+
+        # start me hide
+        self.hold_wrap.pack_forget()
+        self.txn_wrap.pack_forget()
+
+        
+    def search_user_data(self):
+
+        username = self.lookup_user.get().strip()
+
+        try:
+
+            report = self.trading.get_portfolio_report(
+                username
+            )
+
+            txns = self.trading.get_user_transactions(
+                username
+            )
+
+            for i in self.lookup_hold_tree.get_children():
+                self.lookup_hold_tree.delete(i)
+
+            for h in report["holdings"]:
+
+                self.lookup_hold_tree.insert(
+                    "",
+                    "end",
+                    values=(
+                        h["ticker"],
+                        h["quantity"],
+                        h["avg_buy_price"],
+                        h["current_price"],
+                        h["pnl"]
+                    )
+                )
+
+            for i in self.lookup_txn_tree.get_children():
+                self.lookup_txn_tree.delete(i)
+
+            for t in reversed(txns):
+
+                self.lookup_txn_tree.insert(
+                    "",
+                    "end",
+                    values=(
+                        t.get("timestamp",""),
+                        t.get("type",""),
+                        t.get("ticker",""),
+                        t.get("quantity",""),
+                        t.get("price","")
+                    )
+                )
+
+        except Exception as e:
+            messagebox.showerror(
+                "Error",
+                str(e)
+            )    
+             
         
     def _configure_style(self):
         style = ttk.Style()
@@ -248,26 +593,38 @@ class StockTradingGUI:
         style.map("Accent.TButton", background=[("active", self.colors["brand2"])])
         style.configure("Soft.TButton", padding=8, font=("Segoe UI", 10))
 
-    
-    
+        
     def _build_layout(self):
+
         header = tk.Frame(self.root, bg=self.colors["brand"], height=72)
         header.pack(fill="x")
         header.pack_propagate(False)
 
-        tk.Label(header, text="Trade Aryan", bg=self.colors["brand"], fg="white",
-                 font=("Segoe UI", 20, "bold")).pack(side="left", padx=18)
-        tk.Label(header, text="Analysis • Comparison • Demo Trading • Table View • Chart Preview",
-                 bg=self.colors["brand"], fg="#fff5e6", font=("Segoe UI", 10)).pack(side="left", padx=8, pady=6)
+        tk.Label(
+            header,
+            text="Trade Aryan",
+            bg=self.colors["brand"],
+            fg="white",
+            font=("Segoe UI",20,"bold")
+        ).pack(side="left", padx=18)
+
+        tk.Label(
+            header,
+            text="Analysis • Comparison • Demo Trading • Table View • Chart Preview",
+            bg=self.colors["brand"],
+            fg="#fff5e6",
+            font=("Segoe UI",10)
+        ).pack(side="left", padx=8, pady=6)
+
+        # Market strip
         self.market_strip = tk.Frame(
             self.root,
             bg="#1f2937",
             height=40
         )
 
-        self.market_strip.pack(
-            fill="x"
-        )
+        self.market_strip.pack(fill="x")
+
         self.market_canvas = tk.Canvas(
             self.market_strip,
             bg="#1f2937",
@@ -281,28 +638,81 @@ class StockTradingGUI:
         )
 
         self.market_x = 1400
-
         self.update_market_strip()
-        
-        body = tk.Frame(self.root, bg=self.colors["bg"])
-        body.pack(fill="both", expand=True, padx=12, pady=12)
+
+        # Main body
+        body = tk.Frame(
+            self.root,
+            bg=self.colors["bg"]
+        )
+
+        body.pack(
+            fill="both",
+            expand=True,
+            padx=12,
+            pady=12
+        )
 
         self.notebook = ttk.Notebook(body)
         self.notebook.pack(fill="both", expand=True)
 
-        self.tab_analyze = tk.Frame(self.notebook, bg=self.colors["bg"])
-        self.tab_compare = tk.Frame(self.notebook, bg=self.colors["bg"])
-        self.tab_trade = tk.Frame(self.notebook, bg=self.colors["bg"])
-        self.tab_log = tk.Frame(self.notebook, bg=self.colors["bg"])
+        # TABS (sirf ek baar)
+        self.tab_analyze = tk.Frame(
+            self.notebook,
+            bg=self.colors["bg"]
+        )
 
-        self.notebook.add(self.tab_analyze, text="Analyze One")
-        self.notebook.add(self.tab_compare, text="Compare Two")
-        self.notebook.add(self.tab_trade, text="Demo Trading")
-        self.notebook.add(self.tab_log, text="Log")
+        self.tab_compare = tk.Frame(
+            self.notebook,
+            bg=self.colors["bg"]
+        )
 
+        self.tab_trade = tk.Frame(
+            self.notebook,
+            bg=self.colors["bg"]
+        )
+
+        self.tab_lookup = tk.Frame(
+            self.notebook,
+            bg=self.colors["bg"]
+        )
+
+        self.tab_log = tk.Frame(
+            self.notebook,
+            bg=self.colors["bg"]
+        )
+
+        # Add tabs
+        self.notebook.add(
+            self.tab_analyze,
+            text="Analyze One"
+        )
+
+        self.notebook.add(
+            self.tab_compare,
+            text="Compare Two"
+        )
+
+        self.notebook.add(
+            self.tab_trade,
+            text="Demo Trading"
+        )
+
+        self.notebook.add(
+            self.tab_lookup,
+            text="Portfolio Lookup"
+        )
+
+        self.notebook.add(
+            self.tab_log,
+            text="Log"
+        )
+
+        # Build all tabs
         self._build_analyze_tab()
         self._build_compare_tab()
         self._build_trade_tab()
+        self._build_lookup_tab()
         self._build_log_tab()
         
 
@@ -556,19 +966,41 @@ class StockTradingGUI:
         hold_wrap, hold_content = self._section(left_bottom, "Portfolio Holdings")
         hold_wrap.pack(fill="both", expand=True)
         self.holdings_frame, self.holdings_tree = self._build_treeview(
-            hold_content,
-            columns=("Ticker", "Quantity", "Avg Buy", "Current", "Cost", "Market", "PnL"),
-        )
+    hold_content,
+    columns=(
+        "Ticker",
+        "Qty",
+        "Avg Buy",
+        "Current",
+        "Cost",
+        "Market",
+        "PnL"
+    )
+)
+
         self.holdings_frame.pack(fill="both", expand=True)
 
-        txn_wrap, txn_content = self._section(right_bottom, "Transactions")
+
+        txn_wrap, txn_content = self._section(
+            right_bottom,
+            "Transactions"
+        )
+
         txn_wrap.pack(fill="both", expand=True)
+
         self.txn_frame, self.txn_tree = self._build_treeview(
             txn_content,
-            columns=("Time", "Type", "Ticker", "Qty", "Price", "Total"),
+            columns=(
+                "Time",
+                "Type",
+                "Ticker",
+                "Qty",
+                "Price",
+                "Total"
+            )
         )
-        self.txn_frame.pack(fill="both", expand=True)
 
+        self.txn_frame.pack(fill="both", expand=True)
     def _build_log_tab(self):
         wrap, content = self._section(self.tab_log, "Application Log")
         wrap.pack(fill="both", expand=True, padx=8, pady=8)
