@@ -41,7 +41,26 @@ class StockTradingGUI:
         self._configure_style()
         self._build_layout()
         self.refresh_user_combo()
-        
+    def get_cached_price(self, ticker):
+        now = time.time()
+
+        if ticker in self.price_cache:
+            price, ts = self.price_cache[ticker]
+            if now - ts < 30:
+                return price
+
+        try:
+            data = yf.Ticker(ticker).history(period="1d")
+
+            if not data.empty:
+                price = float(data["Close"].iloc[-1])
+                self.price_cache[ticker] = (price, now)
+                return price
+
+        except:
+            pass
+
+        return 0   
         
     def get_fast_price(self, ticker):
 
@@ -263,78 +282,48 @@ class StockTradingGUI:
             data = yf.Ticker(ticker).history(period="1d")
 
             if not data.empty:
-                price = data["Close"].iloc[-1]
+                price = self.get_cached_price(ticker)
                 self.current_price_var.set(f"{price:.2f}")
             else:
                 self.current_price_var.set("No Data")
 
         except Exception as e:
             self.current_price_var.set("Error")
-            self.log(f"Price fetch error: {e}")  
+            self.log(f"Price fetch error: {e}")
+            
+    def _update_lookup_ui(self, report):
+
+        self.txn_wrap.pack_forget()
+        self.hold_wrap.pack(fill="both", expand=True, pady=10)
+
+        self.lookup_hold_tree.delete(*self.lookup_hold_tree.get_children())
+
+        for h in report["holdings"]:
+            self.lookup_hold_tree.insert("", "end", values=(
+                h["ticker"],
+                h["quantity"],
+                round(h["avg_buy_price"], 2),
+                round(h["current_price"], 2),
+                round(h["pnl"], 2)
+            ))        
+              
     def show_lookup_portfolio(self):
 
         username = self.lookup_user.get().strip()
-
         if not username:
-            messagebox.showerror(
-                "Error",
-                "Enter username"
-            )
+            messagebox.showerror("Error", "Enter username")
             return
 
         def task():
-
             try:
+                report = self.trading.get_portfolio_report(username)
 
-                report = self.trading.get_portfolio_report(
-                    username
-                )
-
-                def update_ui():
-
-                    # transaction hide
-                    self.txn_wrap.pack_forget()
-
-                    # portfolio show
-                    self.hold_wrap.pack(
-                        fill="both",
-                        expand=True,
-                        pady=10
-                    )
-
-                    for item in self.lookup_hold_tree.get_children():
-                        self.lookup_hold_tree.delete(item)
-
-                    for h in report["holdings"]:
-
-                        self.lookup_hold_tree.insert(
-                            "",
-                            "end",
-                            values=(
-                                h["ticker"],
-                                h["quantity"],
-                                round(h["avg_buy_price"],2),
-                                round(h["current_price"],2),
-                                round(h["pnl"],2)
-                            )
-                        )
-
-                self.root.after(0, update_ui)
+                self.root.after(0, lambda: self._update_lookup_ui(report))
 
             except Exception as e:
-                self.root.after(
-                    0,
-                    lambda: messagebox.showerror(
-                        "Error",
-                        str(e)
-                    )
-                )
+                self.root.after(0, lambda: messagebox.showerror("Error", str(e)))
 
-        threading.Thread(
-            target=task,
-            daemon=True
-        ).start()
-        
+        threading.Thread(target=task, daemon=True).start()
 
 
     def show_lookup_transactions(self):
@@ -926,8 +915,6 @@ class StockTradingGUI:
         btnrow3 = tk.Frame(user_content, bg=self.colors["panel"])
         btnrow3.grid(row=10, column=0, columnspan=2, sticky="w", pady=4)
         ttk.Button(btnrow3, text="Refresh Portfolio", command=self.refresh_portfolio, style="Soft.TButton").pack(side="left", padx=(0, 8))
-        ttk.Button(btnrow3, text="Refresh Transactions", command=self.refresh_transactions, style="Soft.TButton").pack(side="left")
-
         summary_wrap, summary_content = self._section(top, "Portfolio Summary")
         summary_wrap.pack(side="left", fill="both", expand=True)
         self.summary_vars = {
@@ -941,66 +928,11 @@ class StockTradingGUI:
         self._summary_card(summary_content, "Holdings Value", self.summary_vars["market"], 0, 1)
         self._summary_card(summary_content, "Portfolio Value", self.summary_vars["total"], 1, 0)
         self._summary_card(summary_content, "PnL", self.summary_vars["pnl"], 1, 1)
-        bottom = tk.Frame(self.tab_trade, bg=self.colors["bg"])
-        bottom.pack(fill="both", expand=True, padx=8, pady=(0,8))
-
-        bottom.grid_columnconfigure(0, weight=1)
-        bottom.grid_columnconfigure(1, weight=1)
-        bottom.grid_rowconfigure(0, weight=1)
-
-        left_bottom = tk.Frame(bottom, bg=self.colors["bg"])
-        left_bottom.grid(
-            row=0,
-            column=0,
-            sticky="nsew",
-            padx=(0,8)
-        )
-
-        right_bottom = tk.Frame(bottom, bg=self.colors["bg"])
-        right_bottom.grid(
-            row=0,
-            column=1,
-            sticky="nsew"
-        )
-
-        hold_wrap, hold_content = self._section(left_bottom, "Portfolio Holdings")
-        hold_wrap.pack(fill="both", expand=True)
-        self.holdings_frame, self.holdings_tree = self._build_treeview(
-    hold_content,
-    columns=(
-        "Ticker",
-        "Qty",
-        "Avg Buy",
-        "Current",
-        "Cost",
-        "Market",
-        "PnL"
-    )
-)
-
-        self.holdings_frame.pack(fill="both", expand=True)
-
-
-        txn_wrap, txn_content = self._section(
-            right_bottom,
-            "Transactions"
-        )
-
-        txn_wrap.pack(fill="both", expand=True)
-
-        self.txn_frame, self.txn_tree = self._build_treeview(
-            txn_content,
-            columns=(
-                "Time",
-                "Type",
-                "Ticker",
-                "Qty",
-                "Price",
-                "Total"
-            )
-        )
-
-        self.txn_frame.pack(fill="both", expand=True)
+        
+    def refresh_transactions(self):
+    # transactions disabled / removed from UI
+        pass    
+        
     def _build_log_tab(self):
         wrap, content = self._section(self.tab_log, "Application Log")
         wrap.pack(fill="both", expand=True, padx=8, pady=8)
@@ -1228,7 +1160,6 @@ class StockTradingGUI:
         try:
             txn = self.trading.deposit_cash(self.trade_user.get().strip(), float(self.trade_cash.get()))
             self.log(f"Deposited {txn['amount']} for {txn['username']}")
-            self.refresh_transactions()
             self.refresh_portfolio()
         except Exception as e:
             messagebox.showerror("Error", str(e))
@@ -1262,7 +1193,6 @@ class StockTradingGUI:
             try:
                 txn = self.trading.sell_share(self.trade_user.get().strip(), self.trade_ticker.get().strip(), int(self.trade_qty.get()))
                 self.log(f"Sold {txn['quantity']} {txn['ticker']} at {txn['price']:.2f}")
-                self.root.after(0, self.refresh_transactions)
                 self.root.after(0, self.refresh_portfolio)
                 self.root.after(0, lambda: messagebox.showinfo("Done", "Sell completed."))
             except Exception as e:
@@ -1289,14 +1219,13 @@ class StockTradingGUI:
         
         while self.auto_trade_active.get():
             try:
-                price = yf.Ticker(ticker).history(period="1d")["Close"].iloc[-1]
+                price = self.get_cached_price(ticker)
                 if (mode == "BUY" and price <= target) or (mode == "SELL" and price >= target):
                     if mode == "BUY":
                         self.trading.buy_share(user, ticker, qty)
                     else:
                         self.trading.sell_share(user, ticker, qty)
                     
-                    self.root.after(0, self.refresh_transactions)
                     self.root.after(0, self.refresh_portfolio)
                     self.root.after(0, lambda: messagebox.showinfo("Algo Success", f"Auto-{mode} executed at {price:.2f}"))
                     self.auto_trade_active.set(False)
@@ -1336,28 +1265,6 @@ class StockTradingGUI:
                 self._money(h["market_value"]), self._money(h["pnl"])
             ))
 
-    def refresh_transactions(self):
-        username = self.trade_user.get().strip()
-        if not username:
-            return
-        try:
-            txns = self.trading.get_user_transactions(username)
-            for item in self.txn_tree.get_children():
-                self.txn_tree.delete(item)
-            for txn in reversed(txns[-200:]):
-                self.txn_tree.insert("", "end", values=(
-                    txn.get("timestamp", ""),
-                    txn.get("type", ""),
-                    txn.get("ticker", ""),
-                    txn.get("quantity", ""),
-                    self._fmt(txn.get("price", "")) if txn.get("price", "") != "" else "",
-                    self._money(txn.get("total", 0)) if "total" in txn else self._money(txn.get("amount", 0)),
-                ))
-            self.log(f"Loaded {len(txns)} transaction(s) for {username}")
-        except Exception as e:
-            messagebox.showerror("Error", str(e))
-            self.log(f"Transactions error: {e}")
-
     def save_snapshot(self):
         def task():
             try:
@@ -1383,11 +1290,10 @@ class StockTradingGUI:
 
                 for s in stocks:
                     df = yf.Ticker(s).history(period="2d")
-                    if len(df) >= 2:
-                        prev = df["Close"].iloc[-2]
+                    if len(df) >= 1:
                         curr = df["Close"].iloc[-1]
-                        change = ((curr - prev) / prev) * 100
-                        data_list.append((s, curr, change))
+                        prev = df["Close"].iloc[-1]
+                        change = 0
 
                 # UI update ONLY in main thread
                 def draw():
@@ -1405,6 +1311,15 @@ class StockTradingGUI:
                             anchor="w",
                             font=("Segoe UI", 10, "bold")
                         )
+                        if not data_list:
+                            self.market_canvas.delete("all")
+                        self.market_canvas.create_text(
+                            20, 18,
+                            text="Loading market data...",
+                            fill="white",
+                            anchor="w"
+                        )
+                        return
 
                         box = self.market_canvas.bbox(item)
                         x = box[2] + 50
@@ -1414,11 +1329,10 @@ class StockTradingGUI:
                         self.market_x = 1400
 
                 self.root.after(0, draw)
-
             except Exception as e:
                 self.log(f"Market Error: {e}")
-
-            self.root.after(500, self.update_market_strip)  # smoother refresh
+                self.root.after(2000, self.update_market_strip)
+            return
 
         threading.Thread(target=task, daemon=True).start()
     def _money(self, x):
